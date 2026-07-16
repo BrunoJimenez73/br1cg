@@ -8,10 +8,11 @@
 ## 1. Antes de empezar (obligatorio)
 
 1. Carga `skill_view(name='br1cg-session-start')` para el workflow de inicio de sesión.
-2. Ejecuta `powershell -File init.ps1` y verifica que termina sin errores. Si falla, **para**.
-3. Lee `progress/current.md` para entender el estado actual.
-4. Lee `feature_list.json` y elige **una** tarea con estado `pending`.
-5. Si es una tarea nueva sin ticket, usa `br1cg-new-feature` skill.
+2. `git pull` para asegurar latest.
+3. Ejecuta `powershell -File init.ps1` y verifica que termina sin errores. Si falla, **para**.
+4. Lee `progress/current.md` para entender el estado actual.
+5. Lee `feature_list.json` y elige **una** tarea con estado `pending`.
+6. Si es una tarea nueva sin ticket, usa `br1cg-new-feature` skill.
 
 ---
 
@@ -21,7 +22,9 @@ Sistema local para generar y controlar overlays HTML (CG) en OBS, vMix, Streamla
 
 **Stack:** Bun + Astro + React + Tailwind + SQLite (bun:sqlite) + WebSocket nativo
 
-**Estado actual:** Features 1-9 (core) ✅ completadas. Feature 10 (Stream Deck + pulido) ⏳ pendiente.
+**Estado actual:** Features 1-10 (core) ✅ + Features 101-106 (parallel library) ✅ completadas.
+
+**Repositorio:** [github.com/BrunoJimenez73/br1cg](https://github.com/BrunoJimenez73/br1cg)
 
 ## 3. Mapa del repositorio
 
@@ -93,7 +96,7 @@ br1cg/
 
 | Archivo | Propósito |
 |---------|-----------|
-| `data/store.db` | Base de datos SQLite (persistente) |
+| `data/store.db` | Base de datos SQLite (persistente, en `.gitignore`) |
 | `dist/` | Build de Astro (servido por Bun en producción) |
 | `src/lib/presets.ts` | Presets de templates (Lower Third, Timer, Ticker, ScoreBug) |
 | `src/lib/pack-presets.ts` | 10 Stream Packs temáticos con paletas coherentes |

@@ -25,3 +25,13 @@
 - Endpoint POST /api/overlays/:id/toggle
 - Documentación Stream Deck en README.md
 - Todas las features completadas (1-10 core + 101-106 parallel)
+
+## 2026-07-16 — Sesión 4: GitHub setup + Control Panel fixes
+- Bug fix: Control Panel ahora dinámico (fetch de overlays desde API)
+- Bug fix: Timer responde a eventos timer:start/timer:pause/timer:reset
+- Control Dashboard reescrito con controles por tipo de overlay
+- .gitignore ampliado (.astro/, .playwright-mcp/, data/store.db, *.png)
+- Creación del repositorio GitHub: github.com/BrunoJimenez73/br1cg
+- Initial commit + push (71 archivos)
+- AGENTS.md actualizado con estado real y GitHub URL
+- CHECKPOINTS.md marcado completo para features core + parallel

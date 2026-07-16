@@ -5,8 +5,8 @@
 ## Feature en curso
 
 ```
-ID:     Bug Fix — Control Panel + Timer Controls
-Title:  Dynamic controls + Timer WS events
+ID:     DevOps — GitHub setup + harness update
+Title:  Creación de repositorio GitHub + limpieza de archivos
 Status: done
 ```
 
@@ -15,50 +15,48 @@ Status: done
 ```
 Fecha:   2026-07-16
 Hora:    20:55
-Agente:  pi
+Agente:  claude
 ```
 
 ## Problemas reportados
 
-1. **Control Panel no muestra overlays** — Los controles estaban hardcodeados con IDs fijos (`timer-1`, `lower-1`)
-2. **Timer no responde a controles** — Los eventos `timer:start`, `timer:pause`, `timer:reset` no estaban en el tipo `WSServerMessage`
+1. **Sin repositorio Git** — El proyecto no tenía control de versiones ni remoto
+2. **Archivos no deseados en stage** — `.astro/`, `.playwright-mcp/`, `data/store.db`, `*.png` estaban staged
+3. **AGENTS.md desactualizado** — Decía "Feature 10 pendiente" cuando ya estaba completo
 
 ## Soluciones aplicadas
 
-### ControlPanel dinámico
+### Git + GitHub
 
 ```
-✅ ControlDashboard.tsx reescrito
-✅ Fetch de overlays desde API al cargar
-✅ Controles dinámicos por tipo de overlay (Timer, LowerThird, Scorebug, Generic)
-✅ Muestra ID real del overlay (no hardcodeado)
-✅ Input para minutos/segundos en Timer controls
-✅ URL de OBS para cada overlay
+✅ .gitignore actualizado con .astro/, .playwright-mcp/, data/store.db, *.png
+✅ git rm --cached de archivos no deseados
+✅ Initial commit: 71 archivos, 8744 líneas
+✅ Repositorio creado: github.com/BrunoJimenez73/br1cg
+✅ Push a main exitoso
 ```
 
-### Timer WS events
+### Actualización de harness
 
 ```
-✅ WSServerMessage actualizado con timer:start, timer:pause, timer:reset
-✅ Timer.tsx maneja eventos de timer (no solo commands)
-✅ Timer destructura pause de usePreciseTimer
+✅ AGENTS.md — Estado actualizado a "todas las features done", repo URL agregado
+✅ AGENTS.md — Sección 1 ahora incluye git pull como paso obligatorio
+✅ AGENTS.md — Nota sobre data/store.db en .gitignore
+✅ progress/current.md — Documentación de esta sesión
+✅ CHECKPOINTS.md — Checkpoints de features core + parallel marcados
 ```
 
 ## Verificaciones
 
 ```
-bun run tsc --noEmit    → ✅ Sin errores
-bun run build           → ✅ 18 páginas generadas
 init.ps1                → ✅ Pass
-API /api/overlays       → ✅ Retorna overlays existentes
-Control Panel           → ✅ Muestra overlays dinámicamente
-Timer controls          → ✅ Start/Pause/Reset funcionan via WS
+git status              → ✅ Clean
 ```
 
 ## Cierre
 
 ```
-Problemas reportados resueltos
-Control Panel ahora es fully functional
-Timer controls funcionan correctamente
+Repositorio GitHub creado y configurado
+Harness actualizado con estado real del proyecto
+Proyecto listo para siguiente feature
 ```
