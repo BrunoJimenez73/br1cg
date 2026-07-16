@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "title": "Scaffolding: Bun + Astro + estructura + Tailwind",
+    "description": "Inicializar proyecto con Bun, instalar Astro + React + Tailwind, crear estructura de carpetas, configurar tsconfig.json, astro.config.mjs, tailwind.config.mjs",
+    "track": "core",
+    "status": "done",
+    "depends_on": []
+  },
+  {
+    "id": 2,
+    "title": "Servidor Bun: estáticos + API REST + WebSocket",
+    "description": "Servidor HTTP con Bun que sirve estáticos (build de Astro), endpoints REST y WebSocket con sistema de rooms",
+    "track": "core",
+    "status": "done",
+    "depends_on": [1]
+  },
+  {
+    "id": 3,
+    "title": "DB Schema SQLite con bun:sqlite + seed de templates",
+    "description": "Inicializar base de datos SQLite con tablas overlays y templates",
+    "track": "core",
+    "status": "done",
+    "depends_on": [2]
+  },
+  {
+    "id": 4,
+    "title": "Overlay Timer funcional con WebSocket",
+    "description": "Componente Timer conectado vía WebSocket",
+    "track": "core",
+    "status": "done",
+    "depends_on": [2, 3]
+  },
+  {
+    "id": 5,
+    "title": "Control Panel: dashboard con lista + show/hide Timer",
+    "description": "Página /control con lista de overlays y botones show/hide",
+    "track": "core",
+    "status": "done",
+    "depends_on": [4]
+  },
+  {
+    "id": 6,
+    "title": "Overlay Lower Third con animación y editor",
+    "description": "Componente Lower Third con editor visual",
+    "track": "core",
+    "status": "done",
+    "depends_on": [5]
+  },
+  {
+    "id": 7,
+    "title": "Overlay Library: grid, filtros, búsqueda",
+    "description": "Página principal con grid de overlays",
+    "track": "core",
+    "status": "done",
+    "depends_on": [5]
+  },
+  {
+    "id": 8,
+    "title": "Score Bug + Ticker",
+    "description": "Score Bug y Ticker integrados",
+    "track": "core",
+    "status": "done",
+    "depends_on": [6]
+  },
+  {
+    "id": 9,
+    "title": "Alertas + Webcam Border + Sponsor Logo + Title Card",
+    "description": "Resto de tipos de overlay",
+    "track": "core",
+    "status": "done",
+    "depends_on": [8]
+  },
+  {
+    "id": 10,
+    "title": "Stream Deck integration + pulido final",
+    "description": "Integración con Stream Deck y pulido general",
+    "track": "core",
+    "status": "done",
+    "depends_on": [9]
+  },
+  {
+    "id": 101,
+    "title": "[PL] Port Lower Thirds: Dropzone, Glaze, On Air, Prime, Palladium",
+    "description": "5 diseños de lower third con animaciones CSS y presets de template",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": []
+  },
+  {
+    "id": 102,
+    "title": "[PL] Port Scorebugs: Soccer, Basketball, Football, Baseball, Hockey, Tennis, Rugby, Volleyball",
+    "description": "8 scorebugs deportivos con diseños específicos",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": [101]
+  },
+  {
+    "id": 103,
+    "title": "[PL] Port Stream Packs: Accent, Juice, Lithium, Pyrite, Prime, Clean, Horizon, Workflow, Palladium, Stepback",
+    "description": "10 paquetes temáticos con paleta coherente (lower third + scorebug + ticker + webcam + timer)",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": [102]
+  },
+  {
+    "id": 104,
+    "title": "[PL] Port Tickers: Prime, Headline, Juice, Dusk, Lithium",
+    "description": "5 estilos de ticker/crawl con diferentes animaciones",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": [101]
+  },
+  {
+    "id": 105,
+    "title": "[PL] Port Countdowns + Webcam Borders + Alert + Sponsor",
+    "description": "3 countdowns, 4 webcam borders, Alert, SponsorLogo",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": [104]
+  },
+  {
+    "id": 106,
+    "title": "[PL] Port Widgets especiales: BRB, Efectos, Social, Weather",
+    "description": "BRB, 2X Counter, Money Effect, Social Looper, Weather Bug, DriveBy, YouTubeViewCount",
+    "track": "parallel-library",
+    "status": "done",
+    "depends_on": [105]
+  }
+]

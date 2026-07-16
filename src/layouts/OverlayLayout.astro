@@ -1,0 +1,27 @@
+---
+import '../styles/overlay.css';
+import '../styles/animations.css';
+
+export interface Props {
+  title?: string;
+  bgColor?: string;
+}
+
+const { title = 'Overlay', bgColor = 'transparent' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; overflow: hidden; }
+    </style>
+  </head>
+  <body style="background: {bgColor};">
+    <slot />
+  </body>
+</html>

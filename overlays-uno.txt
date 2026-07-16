@@ -1,0 +1,105 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - button "Open menu" [ref=e7] [cursor=pointer]
+        - link "Go to home" [ref=e10] [cursor=pointer]:
+          - /url: /
+          - img "uno" [ref=e11]
+        - generic [ref=e13]:
+          - button "Log in" [ref=e14] [cursor=pointer]
+          - button "Sign up" [ref=e15] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - heading "Overlays that elevate content" [level=1] [ref=e21]
+        - generic [ref=e24]:
+          - button "Podcast" [ref=e25] [cursor=pointer]
+          - button "Game" [ref=e31] [cursor=pointer]
+          - button "Weather" [ref=e37] [cursor=pointer]
+          - button "News" [ref=e43] [cursor=pointer]
+          - button "Sport" [ref=e49] [cursor=pointer]
+          - button "Holiday" [ref=e55] [cursor=pointer]
+          - button "Business & Finance" [ref=e61] [cursor=pointer]
+          - button "Art & Design" [ref=e67] [cursor=pointer]
+          - button "Education" [ref=e73] [cursor=pointer]
+          - button "Spiritual" [ref=e79] [cursor=pointer]
+      - generic [ref=e86]:
+        - generic [ref=e87]:
+          - generic [ref=e88]
+          - list [ref=e93]
+        - generic [ref=e858]:
+          - generic [ref=e859]
+          - list [ref=e864]
+        - generic [ref=e1279]:
+          - generic [ref=e1280]
+          - list [ref=e1285]
+      - generic [ref=e2080]:
+        - generic [ref=e2081]:
+          - generic [ref=e2082]
+          - generic [ref=e2087]
+          - generic [ref=e2092]
+        - link "Overlay Preview" [ref=e2097] [cursor=pointer]:
+          - /url: https://youtu.be/KtJvpXo11Nk?feature=shared
+          - img "Overlay Preview" [ref=e2099]
+      - generic [ref=e2101]:
+        - generic [ref=e2102]:
+          - generic [ref=e2103]
+          - img "Customizable, real-time graphic overlays" [ref=e2107]
+        - generic [ref=e2108]:
+          - img "Seamless integration with popular streaming software" [ref=e2110]
+          - generic [ref=e2111]
+        - generic [ref=e2114]:
+          - generic [ref=e2115]
+          - img "Control from mobile" [ref=e2119]
+        - generic [ref=e2120]:
+          - img "Compatible with top streaming platforms" [ref=e2122]
+          - generic [ref=e2123]
+      - generic [ref=e2127]:
+        - heading "Quality overlays made easy" [level=2] [ref=e2128]
+        - generic [ref=e2129]:
+          - generic [ref=e2130]
+          - generic [ref=e2136]
+          - generic [ref=e2142]
+        - link "See how it works" [ref=e2148] [cursor=pointer]:
+          - /url: https://resources.overlays.uno/
+      - generic [ref=e2150]:
+        - generic [ref=e2151]:
+          - heading "Get more with uno Plus" [level=2] [ref=e2152]
+          - paragraph [ref=e2153]: Break limits and get access to amazing features
+        - generic [ref=e2155]:
+          - generic [ref=e2156]
+          - generic [ref=e2159]
+          - generic [ref=e2161]
+        - generic [ref=e2222]: •100% money back guaranteed
+      - generic [ref=e2226]:
+        - heading "uno in numbers" [level=2] [ref=e2227]
+        - generic [ref=e2228]:
+          - generic [ref=e2229]
+          - generic [ref=e2236]
+          - generic [ref=e2243]
+      - generic [ref=e2251]:
+        - generic [ref=e2252]:
+          - heading "Never miss new, cool things" [level=2] [ref=e2253]
+          - paragraph [ref=e2254]: Follow our community to keep up with the latest and greatest
+        - generic [ref=e2255]:
+          - link "Join our Discord Join our Discord Join discussion, make overlay requests, and more" [ref=e2256] [cursor=pointer]:
+            - /url: https://discord.gg/g6rJYsXua9
+          - link "YouTube Subscribe to our YT See what the community is saying about uno" [ref=e2262] [cursor=pointer]:
+            - /url: https://www.youtube.com/@uno-overlays
+          - button "Send Feedback Report bugs and ask questions" [ref=e2268] [cursor=pointer]
+          - link "Donate to uno Support our team without subscribing to Plus" [ref=e2275] [cursor=pointer]:
+            - /url: https://www.buymeacoffee.com/overlays.uno
+      - generic [ref=e2282]:
+        - generic [ref=e2283]:
+          - generic [ref=e2284]
+          - generic [ref=e2293]
+        - generic [ref=e2346]:
+          - img "overlays.uno" [ref=e2347]
+          - generic [ref=e2348]
+  - generic [active]:
+    - generic:
+      - generic: Stay Ahead with Exclusive Overlays & Updates!
+      - generic: Be the first to access new features, pro tips & special offers. You can turn off notifications anytime!
+      - generic:
+        - button "Don't Allow"
+        - button "Allow"

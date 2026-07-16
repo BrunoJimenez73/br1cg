@@ -1,0 +1,186 @@
+/* ─────────────────────────────────────────────
+   br1cg — Animaciones para overlays
+   ───────────────────────────────────────────── */
+
+/* ─── Slide Left (con bounce) ─── */
+@keyframes ol-slide-left {
+  0%   { transform: translateX(-120%); }
+  60%  { transform: translateX(2%); }
+  80%  { transform: translateX(-0.5%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes ol-slide-left-out {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-120%); }
+}
+
+/* ─── Slide Right ─── */
+@keyframes ol-slide-right {
+  0%   { transform: translateX(120%); }
+  60%  { transform: translateX(-2%); }
+  80%  { transform: translateX(0.5%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes ol-slide-right-out {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(120%); }
+}
+
+/* ─── Fade ─── */
+@keyframes ol-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes ol-fade-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── Fade + Slide Up ─── */
+@keyframes ol-fade-up {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ol-fade-up-out {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* ─── Fade + Zoom ─── */
+@keyframes ol-fade-zoom {
+  0%   { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ol-fade-zoom-out {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+
+/* ─── Bounce ─── */
+@keyframes ol-bounce-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ol-bounce-out {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; }
+}
+
+/* ─── Record Pulse ─── */
+@keyframes ol-pulse-record {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+/* ─── Glow ─── */
+@keyframes ol-glow {
+  0%, 100% { box-shadow: 0 0 5px var(--glow-color, #3b82f6); }
+  50%      { box-shadow: 0 0 20px var(--glow-color, #3b82f6), 0 0 40px var(--glow-color, #3b82f6); }
+}
+
+/* ─── Rainbow ─── */
+@keyframes ol-rainbow {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* ─── Pop ─── */
+@keyframes ol-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ol-pop-out {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.5); opacity: 0; }
+}
+
+/* ─── Ticker scroll ─── */
+@keyframes ol-ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Timer flash (cuando termina) ─── */
+@keyframes ol-timer-flash {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+/* ─── Slide Up (general) ─── */
+@keyframes ol-slide-up {
+  0%   { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes ol-slide-up-out {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+/* ─── Zoom ─── */
+@keyframes ol-zoom-in {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ol-zoom-out {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* ─── Clases utilitarias ─── */
+.ol-anim-slide-left   { animation: ol-slide-left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.ol-anim-slide-right  { animation: ol-slide-right 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.ol-anim-fade         { animation: ol-fade-in 0.4s ease-out forwards; }
+.ol-anim-fade-up      { animation: ol-fade-up 0.5s ease-out forwards; }
+.ol-anim-fade-zoom    { animation: ol-fade-zoom 0.5s ease-out forwards; }
+.ol-anim-bounce       { animation: ol-bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.ol-anim-pop          { animation: ol-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.ol-anim-slide-up     { animation: ol-slide-up 0.5s ease-out forwards; }
+.ol-anim-zoom         { animation: ol-zoom-in 0.5s ease-out forwards; }
+
+/* Out animations */
+.ol-anim-out-slide-left  { animation: ol-slide-left-out 0.4s ease-in forwards; }
+.ol-anim-out-slide-right { animation: ol-slide-right-out 0.4s ease-in forwards; }
+.ol-anim-out-fade        { animation: ol-fade-out 0.3s ease-in forwards; }
+.ol-anim-out-fade-up     { animation: ol-fade-up-out 0.4s ease-in forwards; }
+.ol-anim-out-fade-zoom   { animation: ol-fade-zoom-out 0.3s ease-in forwards; }
+.ol-anim-out-bounce      { animation: ol-bounce-out 0.4s ease-in forwards; }
+.ol-anim-out-pop         { animation: ol-pop-out 0.3s ease-in forwards; }
+.ol-anim-out-slide-up    { animation: ol-slide-up-out 0.4s ease-in forwards; }
+.ol-anim-out-zoom        { animation: ol-zoom-out 0.3s ease-in forwards; }
+
+/* ─── Drive-By ─── */
+@keyframes ol-driveby-left {
+  0%   { transform: translateX(110%); }
+  100% { transform: translateX(-110%); }
+}
+@keyframes ol-driveby-right {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(110%); }
+}
+
+/* ─── Money Effect (partículas cayendo) ─── */
+@keyframes ol-money-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ─── Delay classes ─── */
+.ol-delay-100 { animation-delay: 100ms; }
+.ol-delay-200 { animation-delay: 200ms; }
+.ol-delay-300 { animation-delay: 300ms; }
+.ol-delay-400 { animation-delay: 400ms; }
+.ol-delay-500 { animation-delay: 500ms; }

@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OverlayLibrary from '../components/library/OverlayLibrary';
+---
+
+<BaseLayout title="br1cg — Overlay Library">
+  <main class="min-h-screen bg-gray-950 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            br1cg
+          </h1>
+          <p class="text-gray-400 mt-1">Overlay Library para OBS / vMix</p>
+        </div>
+        <div class="flex gap-3">
+          <a
+            href="/control"
+            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors"
+          >
+            Control Panel
+          </a>
+          <a
+            href="/editor?id=new"
+            class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors"
+          >
+            + New Overlay
+          </a>
+        </div>
+      </div>
+      <OverlayLibrary client:load />
+    </div>
+  </main>
+</BaseLayout>

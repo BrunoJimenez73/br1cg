@@ -1,0 +1,31 @@
+---
+import OverlayLayout from '../../layouts/OverlayLayout.astro';
+import OverlayRenderer from '../../components/overlays/OverlayRenderer';
+
+export async function getStaticPaths() {
+  return [
+    { params: { type: 'timer' } },
+    { params: { type: 'lower-third' } },
+    { params: { type: 'scorebug' } },
+    { params: { type: 'title-card' } },
+    { params: { type: 'ticker' } },
+    { params: { type: 'alert' } },
+    { params: { type: 'webcam-border' } },
+    { params: { type: 'sponsor-logo' } },
+    { params: { type: 'brb' } },
+    { params: { type: '2x-counter' } },
+    { params: { type: 'money-effect' } },
+    { params: { type: 'social-looper' } },
+    { params: { type: 'weather-bug' } },
+    { params: { type: 'yt-view-count' } },
+    { params: { type: 'driveby' } },
+  ];
+}
+
+const { type } = Astro.params;
+const bgColor = Astro.url.searchParams.get('bgColor') || 'transparent';
+---
+
+<OverlayLayout title={`Overlay - ${type}`} bgColor={bgColor}>
+  <OverlayRenderer client:only="react" type={type!} />
+</OverlayLayout>
