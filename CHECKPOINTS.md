@@ -12,8 +12,8 @@
 - [x] **Sin console.log() de debug**: No hay `console.log()` ni `console.debug()` en producción
 - [x] **Sin archivos temporales**: No hay `.tmp`, `.log` (excepto los intencionales), ni archivos huérfanos
 - [x] **Repositorio en GitHub**: github.com/BrunoJimenez73/br1cg
-- [ ] **progress/current.md actualizado**: La sesión queda documentada
-- [ ] **feature_list.json actualizado**: La feature marcada como `done`
+- [x] **progress/current.md actualizado**: La sesión queda documentada
+- [x] **feature_list.json actualizado**: La feature marcada como `done`
 
 ## Checkpoints por capa
 
