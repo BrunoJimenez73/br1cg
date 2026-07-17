@@ -143,15 +143,18 @@ export default function OverlayEditor() {
 
       setSaved(true);
 
-      // Send WebSocket update to live overlay
+      // Send WebSocket update to live overlay with full data + elements
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         const updateMsg = {
-          type: 'overlay:update',
+          type: 'overlay:save',
           overlayId: savedId,
-          data: form.data,
+          data: {
+            ...form.data,
+            elements: form.elements,
+          },
         };
         wsRef.current.send(JSON.stringify(updateMsg));
-        console.log('[Editor] Sent WebSocket update:', updateMsg);
+        console.log('[Editor] Sent WebSocket save:', updateMsg);
       }
 
       setTimeout(() => setSaved(false), 3000);
