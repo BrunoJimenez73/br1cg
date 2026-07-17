@@ -84,3 +84,28 @@ Después de la sesión principal se detectaron y corrigieron:
 - El snapshot browser es "empty page" pero es limitación de la herramienta — el DOM sí renderiza
 
 Pendiente: No se puede probar WS cross-tab en esta sesión (browser tool single-tab). Para probar: abrir overlay en OBS y dashboard en navegador.
+
+---
+
+## Post-sesión v2: Editor → Overlay en vivo
+
+- **Editor guardaba solo `form.data`** en WS, faltaban `elements` (posición/diseño)
+- **OverlayRenderer no escuchaba WS** — solo cargaba config una vez al montar
+- **Fix**: Editor ahora envía `overlay:save` con payload completo (data + elements)
+- **Fix**: OverlayRenderer conecta WS y re-fetchea config completa cuando recibe `command:update`
+- **Verificado**: posición cambió de left:84px → left:500px → left:0px sin recargar página
+- **Commit**: `255bdc9` — "fix: overlay editor changes now propagate to live overlay via WS"
+- **Skill**: `br1cg-fix-timer-ws` actualizada con sección 5 (editor-overlay propagation)
+
+## Estado final
+
+| Componente | Funciona |
+|-----------|----------|
+| Servidor | ✅ Online (http://localhost:3001) |
+| Library | ✅ Lista, edita, elimina |
+| Editor → Overlay | ✅ Cambios en vivo via WS re-fetch |
+| Dashboard → Timer | ✅ Start/Pause/Reset via WS |
+| Timer overlay | ✅ Amarillo, 5min, top-left, controlable |
+| Tests | ✅ 110/110 (100 vitest + 10 bun) |
+| Build | ✅ 18 páginas, 0 errores |
+| GitHub | ✅ 3 commits en master, subido |
