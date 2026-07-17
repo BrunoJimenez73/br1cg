@@ -114,6 +114,77 @@ export async function handleOverlayRoutes(
     return jsonResponse(result);
   }
 
+  // GET /api/overlays/export — export all overlays as JSON
+  if (method === 'GET' && path === '/api/overlays/export') {
+    const overlays = getAllOverlays();
+    return jsonResponse({
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      count: overlays.length,
+      overlays,
+    });
+  }
+
+  // POST /api/overlays/import — import overlays from JSON array
+  if (method === 'POST' && path === '/api/overlays/import') {
+    try {
+      const body = await req.json() as { overlays?: unknown[] };
+      if (!body.overlays || !Array.isArray(body.overlays)) {
+        return errorResponse('Body must contain an "overlays" array', 400);
+      }
+
+      const { v4: uuid } = await import('uuid');
+      const { getDefaultConfig, getDefaultElements } = await import('../../src/lib/defaults');
+
+      let imported = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      for (const raw of body.overlays) {
+        const item = raw as Record<string, unknown>;
+        // Validate required fields
+        if (!item.type || typeof item.type !== 'string' || !VALID_TYPES.has(item.type as any)) {
+          errors.push(`Invalid type: ${item.type}`);
+          continue;
+        }
+
+        const id = (typeof item.id === 'string' && item.id) ? item.id : uuid();
+        const existing = getOverlay(id);
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        const now = new Date().toISOString();
+        const overlay = {
+          id,
+          name: (typeof item.name === 'string' && item.name.trim()) || 'Imported overlay',
+          type: item.type as string,
+          data: (item.data && typeof item.data === 'object' && !Array.isArray(item.data))
+            ? item.data as Record<string, unknown>
+            : getDefaultConfig(item.type as any),
+          elements: Array.isArray(item.elements) ? item.elements : getDefaultElements(item.type as any),
+          tags: Array.isArray(item.tags) ? item.tags as string[] : [],
+          favorite: Boolean(item.favorite),
+          createdAt: (typeof item.createdAt === 'string' && item.createdAt) || now,
+          updatedAt: now,
+        };
+
+        createOverlay(overlay);
+        imported++;
+      }
+
+      return jsonResponse({
+        success: true,
+        imported,
+        skipped,
+        errors,
+      });
+    } catch {
+      return errorResponse('Invalid JSON');
+    }
+  }
+
   // GET /api/overlays/:id
   // PUT /api/overlays/:id
   // DELETE /api/overlays/:id

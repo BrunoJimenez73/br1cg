@@ -8,6 +8,7 @@ export default function OverlayLibrary() {
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     fetchOverlays();
@@ -44,6 +45,61 @@ export default function OverlayLibrary() {
     }
   }
 
+  async function handleExport() {
+    try {
+      const data = await api.exportOverlays();
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `br1cg-overlays-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Export failed');
+    }
+  }
+
+  function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        setImporting(true);
+        const data = JSON.parse(e.target?.result as string);
+        const overlaysToImport = data.overlays || data; // Support both formats
+        if (!Array.isArray(overlaysToImport)) {
+          setError('Invalid file format: expected an array of overlays');
+          return;
+        }
+        const result = await api.importOverlays(overlaysToImport);
+        if (result.imported > 0) {
+          await fetchOverlays(); // Refresh the list
+        }
+        const msg = `Imported: ${result.imported}, Skipped: ${result.skipped}`;
+        if (result.errors.length > 0) {
+          setError(`${msg} (${result.errors.length} errors: ${result.errors.slice(0, 3).join(', ')}${result.errors.length > 3 ? '...' : ''})`);
+        } else {
+          // Show success as a temporary message
+          setError(null);
+          alert(msg);
+        }
+      } catch (err) {
+        setError('Failed to parse import file');
+      } finally {
+        setImporting(false);
+        // Reset file input so same file can be imported again
+        event.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -74,6 +130,23 @@ export default function OverlayLibrary() {
           onChange={e => setFilter(e.target.value)}
           className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500"
         />
+        <button
+          onClick={handleExport}
+          disabled={overlays.length === 0}
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors whitespace-nowrap text-sm"
+        >
+          ↓ Export
+        </button>
+        <label className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors whitespace-nowrap text-sm cursor-pointer">
+          {importing ? '⏳ Importing...' : '↑ Import'}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleImportFile}
+            className="hidden"
+            disabled={importing}
+          />
+        </label>
         <a
           href="/editor?id=new"
           className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors whitespace-nowrap"

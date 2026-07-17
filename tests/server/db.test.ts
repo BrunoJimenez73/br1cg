@@ -7,6 +7,15 @@ import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { Database } from 'bun:sqlite';
 import type { OverlayConfig } from '../../src/lib/types';
 
+// Shared constants for validation tests
+const OVERLAY_TYPES = [
+  'lower-third', 'timer', 'scorebug', 'title-card',
+  'ticker', 'alert', 'webcam-border', 'sponsor-logo',
+  'brb', '2x-counter', 'money-effect',
+  'social-looper', 'weather-bug', 'yt-view-count', 'driveby',
+] as const;
+const VALID_TYPES = new Set(OVERLAY_TYPES);
+
 // Usar base de datos temporal para no contaminar la real
 const TEST_DB_PATH = ':memory:';
 let db: Database;
@@ -194,14 +203,6 @@ describe('Server API - WebSocket Messages', () => {
 });
 
 describe('Server API - Input Validation', () => {
-  const OVERLAY_TYPES = [
-    'lower-third', 'timer', 'scorebug', 'title-card',
-    'ticker', 'alert', 'webcam-border', 'sponsor-logo',
-    'brb', '2x-counter', 'money-effect',
-    'social-looper', 'weather-bug', 'yt-view-count', 'driveby',
-  ] as const;
-  const VALID_TYPES = new Set(OVERLAY_TYPES);
-
   // Replicate the validation logic from server/routes/overlays.ts
   function validateOverlayBody(body: Record<string, unknown>): string | null {
     if (!body.type || typeof body.type !== 'string' || !VALID_TYPES.has(body.type as any)) {
@@ -268,5 +269,140 @@ describe('Server API - Input Validation', () => {
     for (const type of OVERLAY_TYPES) {
       expect(validateOverlayBody({ type })).toBeNull();
     }
+  });
+});
+
+describe('Server API - Export/Import Logic', () => {
+  let exportDb: Database;
+
+  beforeAll(() => {
+    exportDb = new Database(':memory:');
+    exportDb.run(`
+      CREATE TABLE IF NOT EXISTS overlays (
+        id TEXT PRIMARY KEY, name TEXT NOT NULL, type TEXT NOT NULL,
+        data TEXT NOT NULL, tags TEXT DEFAULT '[]', favorite INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+      )
+    `);
+    try { exportDb.run(`ALTER TABLE overlays ADD COLUMN elements TEXT DEFAULT '[]'`); } catch {}
+  });
+
+  afterAll(() => {
+    exportDb.close();
+  });
+
+  function createTestOverlay(overlay: OverlayConfig): void {
+    exportDb.run(
+      'INSERT INTO overlays (id, name, type, data, elements, tags, favorite, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [overlay.id, overlay.name, overlay.type, JSON.stringify(overlay.data), JSON.stringify(overlay.elements || []), JSON.stringify(overlay.tags), overlay.favorite ? 1 : 0, overlay.createdAt, overlay.updatedAt]
+    );
+  }
+
+  function getTestOverlay(id: string): OverlayConfig | null {
+    type Row = { id: string; name: string; type: string; data: string; elements: string; tags: string; favorite: number; created_at: string; updated_at: string; };
+    const row = exportDb.query('SELECT * FROM overlays WHERE id = ?').get(id) as Row | null;
+    if (!row) return null;
+    return {
+      id: row.id, name: row.name, type: row.type as OverlayConfig['type'],
+      data: JSON.parse(row.data), elements: JSON.parse(row.elements || '[]'),
+      tags: JSON.parse(row.tags), favorite: row.favorite === 1,
+      createdAt: row.created_at, updatedAt: row.updated_at,
+    };
+  }
+
+  it('debe tener formato de export correcto', () => {
+    const rows = exportDb.query('SELECT * FROM overlays').all();
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      count: rows.length,
+      overlays: rows,
+    };
+    expect(exportData.version).toBe(1);
+    expect(typeof exportData.exportedAt).toBe('string');
+    expect(typeof exportData.count).toBe('number');
+    expect(Array.isArray(exportData.overlays)).toBeTrue();
+  });
+
+  it('debe importar overlays nuevos correctamente', () => {
+    const newOverlays = [
+      {
+        id: 'imported-1', name: 'Imported Timer', type: 'timer',
+        data: { minutes: 5, seconds: 0 }, elements: [], tags: ['imported'],
+        favorite: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'imported-2', name: 'Imported Lower Third', type: 'lower-third',
+        data: { title: 'Hello' }, elements: [], tags: [],
+        favorite: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      },
+    ];
+
+    let imported = 0;
+    for (const overlay of newOverlays) {
+      const existing = getTestOverlay(overlay.id);
+      if (!existing) {
+        createTestOverlay(overlay);
+        imported++;
+      }
+    }
+
+    expect(imported).toBe(2);
+    expect(getTestOverlay('imported-1')).not.toBeNull();
+    expect(getTestOverlay('imported-2')).not.toBeNull();
+  });
+
+  it('debe saltar overlays existentes al importar', () => {
+    const existing = getTestOverlay('imported-1');
+    expect(existing).not.toBeNull();
+
+    let imported = 0;
+    let skipped = 0;
+
+    const overlay = {
+      id: 'imported-1', name: 'Imported Timer Updated', type: 'timer',
+      data: {}, elements: [], tags: [], favorite: false,
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    };
+
+    const existingCheck = getTestOverlay(overlay.id);
+    if (existingCheck) {
+      skipped++;
+    } else {
+      createTestOverlay(overlay);
+      imported++;
+    }
+
+    expect(imported).toBe(0);
+    expect(skipped).toBe(1);
+    expect(getTestOverlay('imported-1')!.name).toBe('Imported Timer');
+  });
+
+  it('debe manejar import con tipo inválido', () => {
+    const overlays = [
+      { id: 'bad-1', name: 'Bad', type: 'invalid-type', data: {} },
+    ];
+
+    const errors: string[] = [];
+    let imported = 0;
+
+    for (const item of overlays) {
+      if (!VALID_TYPES.has(item.type as any)) {
+        errors.push(`Invalid type: ${item.type}`);
+        continue;
+      }
+      createTestOverlay(item as any);
+      imported++;
+    }
+
+    expect(imported).toBe(0);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('invalid-type');
+  });
+
+  it('debe limpiar datos de importación', () => {
+    exportDb.run('DELETE FROM overlays WHERE id LIKE ?', ['imported-%']);
+    expect(getTestOverlay('imported-1')).toBeNull();
+    expect(getTestOverlay('imported-2')).toBeNull();
   });
 });

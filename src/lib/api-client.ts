@@ -64,3 +64,26 @@ export async function updateOverlay(
 export async function deleteOverlay(id: string): Promise<{ success: boolean }> {
   return request<{ success: boolean }>(`/${id}`, { method: 'DELETE' });
 }
+
+/** Export all overlays as JSON */
+export async function exportOverlays(): Promise<{
+  version: number;
+  exportedAt: string;
+  count: number;
+  overlays: OverlayConfig[];
+}> {
+  return request('/export');
+}
+
+/** Import overlays from JSON array */
+export async function importOverlays(overlays: OverlayConfig[]): Promise<{
+  success: boolean;
+  imported: number;
+  skipped: number;
+  errors: string[];
+}> {
+  return request('/import', {
+    method: 'POST',
+    body: JSON.stringify({ overlays }),
+  });
+}
