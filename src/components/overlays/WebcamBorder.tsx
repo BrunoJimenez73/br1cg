@@ -5,11 +5,12 @@ interface WebcamBorderProps { config?: Partial<WebcamBorderConfig>; overlayId?: 
 
 export function WebcamBorder({ config: c, overlayId }: WebcamBorderProps) {
   const [visible, setVisible] = useState(true);
+  const [live, setLive] = useState<Partial<WebcamBorderConfig>>({});
   const cfg = useMemo<WebcamBorderConfig>(() => ({
     width: 320, height: 240, borderRadius: 8, borderWidth: 2,
     borderColor: '#3b82f6', bgColor: '#0f172a', glowColor: '#3b82f633',
-    showName: true, playerName: 'Player', style: 'minimal', position: 'bottom-right', ...c
-  }), [c]);
+    showName: true, playerName: 'Player', style: 'minimal', position: 'bottom-right', ...c, ...live
+  }), [c, live]);
 
   useWebSocket({
     overlayId,
@@ -17,6 +18,7 @@ export function WebcamBorder({ config: c, overlayId }: WebcamBorderProps) {
       if (msg.type === 'command') {
         if (msg.action === 'show') setVisible(true);
         else if (msg.action === 'hide') setVisible(false);
+        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
       }
     },
   });

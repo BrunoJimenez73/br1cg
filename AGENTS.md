@@ -22,7 +22,11 @@ Sistema local para generar y controlar overlays HTML (CG) en OBS, vMix, Streamla
 
 **Stack:** Bun + Astro + React + Tailwind + SQLite (bun:sqlite) + WebSocket nativo
 
-**Estado actual:** Features 1-10 (core) ✅ + Features 101-106 (parallel library) ✅ completadas.
+**Estado actual:** Core (1-10) ✅ + Parallel Library (101-106) ✅ + Refactor (201-207) ✅ completadas.
+**Tests:** 110 tests (100 vitest + 10 bun test) — todos pasan.
+**CI/CD:** GitHub Actions (lint → test → test:server → build) en cada push.
+**Editor visual:** Conectado a API + WS + Zustand store + template picker.
+**Server:** Refactorizado en orquestador + middleware + routes modulares.
 
 **Repositorio:** [github.com/BrunoJimenez73/br1cg](https://github.com/BrunoJimenez73/br1cg)
 
@@ -60,10 +64,9 @@ br1cg/
 ├── src/
 │   ├── components/
 │   │   ├── overlays/          # Renderers individuales (LowerThird, Timer, etc.)
-│   │   ├── controls/          # Paneles de control por tipo
+│   │   ├── controls/          # Paneles de control por tipo (ControlDashboard + sub-componentes)
 │   │   ├── editor/            # Editor visual con preview en vivo
-│   │   ├── library/           # Explorador de overlays
-│   │   └── shared/            # ConnectionStatus, ColorPicker, WSIndicator
+│   │   └── library/           # Explorador de overlays
 │   ├── pages/
 │   │   ├── index.astro        # Library / Home
 │   │   ├── overlay/
@@ -71,25 +74,27 @@ br1cg/
 │   │   ├── control/
 │   │   │   └── index.astro    # Dashboard de control
 │   │   └── editor/
-│   │       └── [id].astro     # Editor individual
+│   │       └── index.astro    # Editor (usa query param ?id=)
 │   ├── layouts/
 │   │   ├── OverlayLayout.astro    # Layout limpio (sin chrome, para OBS)
 │   │   └── BaseLayout.astro       # Layout con navegación
 │   ├── lib/
 │   │   ├── types.ts           # Todos los tipos compartidos
 │   │   ├── ws-client.ts       # Cliente WebSocket (broadcast a overlays)
-│   │   ├── api-client.ts      # Cliente REST para CRUD
+│   │   ├── api-client.ts      # Cliente REST para overlays (CRUD)
 │   │   ├── defaults.ts        # Configs default por tipo de overlay
-│   │   └── overlay-store.ts   # Zustand store (control panel)
+│   │   ├── presets.ts         # Presets de templates
+│   │   └── pack-presets.ts    # 10 Stream Packs temáticos
 │   └── styles/
 │       ├── overlay.css         # Estilos base para overlays
 │       └── animations.css      # Animaciones reutilizables
 │
 └── server/
-    ├── index.ts               # Entry point Bun server (HTTP + WS + API routes inline)
+    ├── index.ts               # Orquestador (78 líneas)
+    ├── middleware.ts           # CORS, JSON, static helpers
+    ├── routes/
+    │   └── overlays.ts        # Rutas REST de overlays + templates
     ├── ws-handler.ts          # Gestión WS: conexiones, rooms, broadcast
-    ├── api/
-    │   └── templates.ts       # (no implementado)
     └── db.ts                  # SQLite init + queries (bun:sqlite)
 
 ## Archivos adicionales presentes
@@ -101,6 +106,15 @@ br1cg/
 | `src/lib/presets.ts` | Presets de templates (Lower Third, Timer, Ticker, ScoreBug) |
 | `src/lib/pack-presets.ts` | 10 Stream Packs temáticos con paletas coherentes |
 | `src/components/overlays/StreamPack.tsx` | Renderizador de paquetes completos |
+| `src/lib/api-client.ts` | Cliente REST (CRUD + WS commands) |
+| `src/lib/overlay-store.ts` | Zustand store del editor |
+| `src/components/editor/TemplatePicker.tsx` | Selector de plantillas |
+| `tests/` | Tests de tipos, componentes, y server (110 tests) |
+| `.github/workflows/ci.yml` | CI/CD (lint → test → build) |
+| `eslint.config.mjs` | ESLint flat config |
+| `.prettierrc` | Prettier config |
+| `thoughts/shared/plans/PL-02-refactor-quality.md` | Plan de refactor 201-207 |
+| `src/pages/editor/[id].astro` | Editor dinámico por ruta |
 ```
 
 ---
@@ -136,6 +150,7 @@ br1cg/
 |------|-----------|------|-----------|
 | Tiempo real | WebSocket (nativo) | `ws://localhost:3001/ws` | Control remoto de overlays activos (con rooms) |
 | Datos | REST | `http://localhost:3001/api/overlays` | CRUD de configuraciones guardadas |
+| Plantillas | REST | `http://localhost:3001/api/templates` | Lista de plantillas predefinidas |
 | Estático | HTTP | `http://localhost:3001/overlay/[type]` | Páginas Browser Source para OBS |
 | Fallback | BroadcastChannel | Mismo origen | Canal extra si overlay y control están en mismo origen |
 
@@ -271,6 +286,13 @@ bun run dev
 | `bun run dev:server` | Bun dev con watch (puerto 3001) |
 | `bun run dev:astro` | Astro dev server (puerto 4321) |
 | `bun run build` | Build Astro + compila server |
+| `bun run lint` | ESLint check |
+| `bun run lint:fix` | ESLint auto-fix |
+| `bun run format` | Prettier formateo automático |
+| `bun run format:check` | Prettier check |
+| `bun run test` | Tests con vitest (componentes + tipos) |
+| `bun run test:server` | Tests de server con bun test (SQLite) |
+| `bun run test:all` | Tests completos (vitest + bun test) |
 | `bun run start` | Servidor producción (puerto 3001) |
 | `bun run db:seed` | Inserta templates por defecto |
 | `bun run tools/dev.js` | Lanzador paralelo (alternativa a `bun run dev`) |
@@ -283,7 +305,9 @@ bun run dev
 | `http://localhost:3001` | Bun server (API + WS + estáticos) |
 | `http://localhost:3001/` | Overlay Library (grid con todos los overlays) |
 | `http://localhost:3001/control` | Dashboard de control |
-| `http://localhost:3001/editor?id=new` | Editor de overlays |
+| `http://localhost:3001/editor?id=new` | Editor de overlays (legacy) |
+| `http://localhost:3001/editor/abc-123` | Editor de overlays dinámico |
+| `http://localhost:3001/api/templates` | Plantillas predefinidas |
 | `http://localhost:3001/overlay/timer` | Overlay Timer (Browser Source para OBS) |
 | `http://localhost:3001/overlay/lower-third` | Lower Third overlay |
 | `http://localhost:3001/overlay/scorebug` | Score Bug overlay |

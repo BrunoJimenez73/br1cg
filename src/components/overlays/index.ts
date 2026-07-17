@@ -7,7 +7,7 @@ export { LowerThird } from './LowerThird';
 export { LTDropzone, LTGlaze, LTOnAir, LTPrime, LTPalladium } from './LowerThird';
 
 // Timers
-export { Timer, useTimerControls } from './Timer';
+export { Timer } from './Timer';
 
 // Tickers
 export { Ticker } from './Ticker';
@@ -28,6 +28,9 @@ export { WBMinimal, WBArcRaiders, WBSciFi, WBFortnite } from './WebcamBorder';
 export { Alert } from './Alert';
 export { SponsorLogo } from './SponsorLogo';
 
+// Title Card
+export { TitleCard } from './TitleCard';
+
 // Stream Packs
 export { StreamPack } from './StreamPack';
 export {
@@ -38,11 +41,11 @@ export {
 // Especiales (Feature 106)
 export { BRB, BRBClassic, BRBNursery } from './BRB';
 export { TwoXCounter, TwoXCounterBurst, TwoXCounterGlide } from './TwoXCounter';
-export { MoneyEffect, MONEY_EFFECT_CSS } from './MoneyEffect';
+export { MoneyEffect } from './MoneyEffect';
 export { SocialLooper, SocialLooperSociable } from './SocialLooper';
 export { WeatherBug, WeatherBugBreeze } from './WeatherBug';
 export { YouTubeViewCount, YTViewCountLive } from './YouTubeViewCount';
-export { DriveBy, DRIVEBY_CSS } from './DriveBy';
+export { DriveBy } from './DriveBy';
 
 // Presets
 export { STREAM_PACKS, getPackById, getPackNames } from '../../lib/pack-presets';
@@ -57,6 +60,7 @@ import { Ticker as _Ticker } from './Ticker';
 import { Alert as _Alert } from './Alert';
 import { WebcamBorder as _WebcamBorder } from './WebcamBorder';
 import { SponsorLogo as _SponsorLogo } from './SponsorLogo';
+import { TitleCard as _TitleCard } from './TitleCard';
 import type { OverlayType } from '../../lib/types';
 import { BRB as _BRB } from './BRB';
 import { TwoXCounter as _TwoXCounter } from './TwoXCounter';
@@ -66,9 +70,7 @@ import { WeatherBug as _WeatherBug } from './WeatherBug';
 import { YouTubeViewCount as _YTViewCount } from './YouTubeViewCount';
 import { DriveBy as _DriveBy } from './DriveBy';
 
-export type ExtendedOverlayType = OverlayType | 'brb' | '2x-counter' | 'money-effect' | 'social-looper' | 'weather-bug' | 'yt-view-count' | 'driveby';
-
-export const OVERLAY_COMPONENTS: Partial<Record<ExtendedOverlayType, React.ComponentType<any>>> = {
+export const OVERLAY_COMPONENTS: Partial<Record<OverlayType, React.ComponentType<any>>> = {
   'lower-third': _LowerThird,
   'timer': _Timer,
   'scorebug': _ScoreBug,
@@ -76,6 +78,7 @@ export const OVERLAY_COMPONENTS: Partial<Record<ExtendedOverlayType, React.Compo
   'alert': _Alert,
   'webcam-border': _WebcamBorder,
   'sponsor-logo': _SponsorLogo,
+  'title-card': _TitleCard,
   'brb': _BRB,
   '2x-counter': _TwoXCounter,
   'money-effect': _MoneyEffect,

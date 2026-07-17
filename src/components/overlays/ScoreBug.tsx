@@ -10,12 +10,13 @@ const SPORT_EMOJI: Record<ScoreBugSport, string> = {
 
 export function ScoreBug({ config: c, overlayId }: ScoreBugProps) {
   const [visible, setVisible] = useState(true);
+  const [live, setLive] = useState<Partial<ScoreBugConfig>>({});
   const cfg = useMemo<ScoreBugConfig>(() => ({
     sport: 'soccer', homeTeam: { name: 'HOME', abbrev: 'HOM', score: 0, color: '#3b82f6' },
     awayTeam: { name: 'AWAY', abbrev: 'AWY', score: 0, color: '#ef4444' },
     period: '1T', periodTime: '', bgColor: '#111827', textColor: '#ffffff',
-    accentColor: '#3b82f6', showSport: true, showTime: true, style: 'default', ...c
-  }), [c]);
+    accentColor: '#3b82f6', showSport: true, showTime: true, style: 'default', ...c, ...live
+  }), [c, live]);
 
   useWebSocket({
     overlayId,
@@ -23,6 +24,7 @@ export function ScoreBug({ config: c, overlayId }: ScoreBugProps) {
       if (msg.type === 'command') {
         if (msg.action === 'show') setVisible(true);
         else if (msg.action === 'hide') setVisible(false);
+        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
       }
     },
   });

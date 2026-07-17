@@ -11,7 +11,14 @@ export type OverlayType =
   | 'ticker'
   | 'alert'
   | 'webcam-border'
-  | 'sponsor-logo';
+  | 'sponsor-logo'
+  | 'brb'
+  | '2x-counter'
+  | 'money-effect'
+  | 'social-looper'
+  | 'weather-bug'
+  | 'yt-view-count'
+  | 'driveby';
 
 // --- Lower Third ---
 export type LowerThirdAnimation = 'slide-left' | 'slide-right' | 'fade' | 'bounce';
@@ -170,6 +177,108 @@ export interface SponsorLogoConfig {
   bgColor?: string;
 }
 
+// --- BRB (Be Right Back) ---
+export interface BRBConfig {
+  message: string;
+  subtitle?: string;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  style: 'classic' | 'nursery';
+  showTimer: boolean;
+  timerMinutes?: number;
+  timerSeconds?: number;
+  logoUrl?: string;
+}
+
+// --- 2X Counter ---
+export interface TwoXCounterConfig {
+  label: string;
+  count: number;
+  maxCount: number;
+  style: 'burst' | 'glide';
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  showMax: boolean;
+  size: 'sm' | 'md' | 'lg';
+}
+
+// --- Money Effect ---
+export interface MoneyEffectConfig {
+  amount: string;
+  currency: string;
+  label: string;
+  duration: number;
+  particleCount: number;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+}
+
+// --- Social Looper ---
+export interface SocialAccount {
+  platform: 'twitter' | 'youtube' | 'instagram' | 'tiktok' | 'discord' | 'twitch' | 'facebook' | 'web';
+  handle: string;
+  url?: string;
+}
+
+export interface SocialLooperConfig {
+  accounts: SocialAccount[];
+  interval: number;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  animation: 'fade' | 'slide' | 'flip';
+  iconSize: number;
+  fontSize: number;
+  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+}
+
+// --- Weather Bug ---
+export interface WeatherData {
+  temperature: number;
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy' | 'windy' | 'partly-cloudy' | 'night';
+  city: string;
+  unit: 'C' | 'F';
+  humidity?: number;
+  windSpeed?: number;
+}
+
+export interface WeatherBugConfig {
+  weather: WeatherData;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  showDetails: boolean;
+  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+}
+
+// --- YouTube View Count ---
+export interface YouTubeViewCountConfig {
+  count: number;
+  label: string;
+  bgColor: string;
+  textColor: string;
+  accentColor: string;
+  animation: 'static' | 'counting' | 'pulse';
+  format: 'compact' | 'full';
+  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+}
+
+// --- Drive-By ---
+export interface DriveByConfig {
+  message: string;
+  fontSize: number;
+  speed: number;
+  textColor: string;
+  bgColor: string;
+  direction: 'left' | 'right';
+  yPosition: number;
+  repeat: boolean;
+  repeatDelay: number;
+}
+
 // --- Editor Elements (visual editor) ---
 export type OverlayElementType = 'text' | 'image' | 'shape' | 'timer-display' | 'score-display';
 
@@ -196,7 +305,7 @@ export interface OverlayConfig {
   createdAt: string;
   updatedAt: string;
   data: OverlayConfigData;
-  elements: OverlayElement[];
+  elements?: OverlayElement[];
   tags: string[];
   favorite: boolean;
 }
@@ -209,7 +318,14 @@ export type OverlayConfigData =
   | TickerConfig
   | AlertConfig
   | WebcamBorderConfig
-  | SponsorLogoConfig;
+  | SponsorLogoConfig
+  | BRBConfig
+  | TwoXCounterConfig
+  | MoneyEffectConfig
+  | SocialLooperConfig
+  | WeatherBugConfig
+  | YouTubeViewCountConfig
+  | DriveByConfig;
 
 // --- Mapa de tipo → interfaz de config ---
 export interface OverlayConfigMap {
@@ -221,6 +337,13 @@ export interface OverlayConfigMap {
   'alert': AlertConfig;
   'webcam-border': WebcamBorderConfig;
   'sponsor-logo': SponsorLogoConfig;
+  'brb': BRBConfig;
+  '2x-counter': TwoXCounterConfig;
+  'money-effect': MoneyEffectConfig;
+  'social-looper': SocialLooperConfig;
+  'weather-bug': WeatherBugConfig;
+  'yt-view-count': YouTubeViewCountConfig;
+  'driveby': DriveByConfig;
 }
 
 // --- Mensajes WebSocket ---
@@ -256,6 +379,8 @@ export interface TimelineEntry {
 export const OVERLAY_TYPES: OverlayType[] = [
   'lower-third', 'timer', 'scorebug', 'title-card',
   'ticker', 'alert', 'webcam-border', 'sponsor-logo',
+  'brb', '2x-counter', 'money-effect',
+  'social-looper', 'weather-bug', 'yt-view-count', 'driveby',
 ];
 
 export const OVERLAY_TYPE_LABELS: Record<OverlayType, string> = {
@@ -267,4 +392,11 @@ export const OVERLAY_TYPE_LABELS: Record<OverlayType, string> = {
   'alert': 'Alert',
   'webcam-border': 'Webcam Border',
   'sponsor-logo': 'Sponsor Logo',
+  'brb': 'BRB',
+  '2x-counter': '2X Counter',
+  'money-effect': 'Money Effect',
+  'social-looper': 'Social Looper',
+  'weather-bug': 'Weather Bug',
+  'yt-view-count': 'YouTube View Count',
+  'driveby': 'Drive-By',
 };

@@ -64,11 +64,12 @@ function usePreciseTimer(cfg: Partial<TimerConfig>) {
 
 export function Timer({ config: c, overlayId }: TimerProps) {
   const [visible, setVisible] = useState(true);
+  const [liveConfig, setLiveConfig] = useState<Partial<TimerConfig>>(c || {});
   const cfg = useMemo<TimerConfig>(() => ({
     minutes: 5, seconds: 0, mode: 'countdown', format: 'mm:ss',
     autoStart: false, bgColor: 'transparent', textColor: '#22c55e',
-    fontSize: '72px', showMillis: false, onComplete: 'stop', ...c
-  }), [c]);
+    fontSize: '72px', showMillis: false, onComplete: 'stop', ...c, ...liveConfig
+  }), [c, liveConfig]);
   const { status, formatted, start, pause, reset } = usePreciseTimer(cfg);
 
   useWebSocket({
@@ -79,7 +80,12 @@ export function Timer({ config: c, overlayId }: TimerProps) {
         else if (msg.action === 'hide') setVisible(false);
         else if (msg.action === 'update') {
           const p = msg.payload as Partial<TimerConfig>;
-          if (p.minutes !== undefined || p.seconds !== undefined) reset(p.minutes, p.seconds);
+          // Update live config with new values
+          setLiveConfig(prev => ({ ...prev, ...p }));
+          // If timer values changed, reset
+          if (p.minutes !== undefined || p.seconds !== undefined) {
+            reset(p.minutes, p.seconds);
+          }
         }
       } else if (msg.type === 'event') {
         // Handle timer-specific events
@@ -154,8 +160,4 @@ export function Timer({ config: c, overlayId }: TimerProps) {
       </div>
     </div>
   );
-}
-
-export function useTimerControls() {
-  return { start: () => {}, pause: () => {}, reset: () => {} };
 }

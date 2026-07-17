@@ -59,3 +59,50 @@
 - [x] **Stream Deck**: Una acción HTTP puede show/hide un overlay
 - [ ] **Export/Import**: Configuraciones se exportan a JSON y se importan de vuelta
 - [ ] **Backup automático**: SQLite se respalda antes de cada migración
+
+| Checkpoints de refactor (Features 201-207) |
+
+### Limpieza (201)
+
+- [x] **Sin componentes legacy**: No existen `LowerThirdOverlay.tsx` ni `TimerOverlay.tsx`
+- [x] **Sin exports muertos**: No hay `useTimerControls`, `DRIVEBY_CSS`, `MONEY_EFFECT_CSS`
+- [x] **LayerPanel completo**: Botones ↑↓ para reordenar z-index
+- [x] **MoneyEffect estable**: `Math.random()` no se ejecuta en render body
+
+### Bugs críticos (202)
+
+- [x] **command:update en todos**: ScoreBug, SponsorLogo, WebcamBorder, WeatherBug, YTViewCount soportan update
+- [x] **WS reconexión**: useWebSocket reconecta automáticamente con backoff exponencial
+- [x] **ControlDashboard limpio**: Componentes de tipo extraídos a archivos separados
+
+### Arquitectura (203)
+
+- [x] **API modular**: Routes en `server/routes/overlays.ts` y templates (incluido en overlays.ts)
+- [x] **Validación de entrada**: POST/PUT validan tipos y campos obligatorios
+- [x] **AGENTS.md preciso**: Mapa del repo actualizado sin referencias a archivos inexistentes
+
+### Tests (205)
+
+- [x] **Tests de componentes**: 83 tests de overlays con vitest
+- [x] **Tests de API**: 10 tests de DB y WS con bun:test
+- [x] **Tests de tipos**: 17 tests de tipos y defaults
+- [x] **Tests pasan**: 110/110 tests pasan
+
+### Documentación (207)
+
+- [x] **AGENTS.md actualizado**: Mapa completo, comandos, URLs, estructura server
+- [x] **progress/current.md**: Documentado
+- [x] **feature_list.json**: Features core y refactor completadas
+
+### Pendiente aún
+
+| Fase | Tarea |
+|------|-------|
+| 204 | Error boundaries |
+| 204 | Presets completos (15/15) |
+| 204 | JSDoc en funciones públicas |
+| 206 | Export/Import |
+| 206 | Backup automático |
+| 207 | docs/architecture.md: incluir server modular y WS reconnect |
+| 207 | docs/conventions.md actualizar (parcialmente ok) |
+| 207 | progress/history.md actualizar |

@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { OVERLAY_TYPE_LABELS, OVERLAY_TYPES, type OverlayConfig, type OverlayType, type OverlayConfigData, type OverlayElement } from '../../lib/types';
 import { getDefaultConfig, getDefaultElements } from '../../lib/defaults';
+import { getOverlay, createOverlay, updateOverlay } from '../../lib/api-client';
+import { useEditorStore } from '../../lib/overlay-store';
 import EditorCanvas from './EditorCanvas';
 import PropertiesPanel from './PropertiesPanel';
 import LayerPanel from './LayerPanel';
+import TemplatePicker from './TemplatePicker';
 
 type Tab = 'config' | 'design';
 
@@ -21,14 +24,32 @@ export default function OverlayEditor() {
     elements: getDefaultElements('timer'),
     tags: [],
   });
+  const [showTemplatePicker, setShowTemplatePicker] = useState(isNew);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [currentId, setCurrentId] = useState(id);
+  const wsRef = useRef<WebSocket | null>(null);
 
+  // Connect to WebSocket for live updates
+  useEffect(() => {
+    if (isNew || !currentId) return;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.port === '4321' ? 'localhost:3001' : window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}/ws?subscribe=${currentId}`);
+
+    ws.onopen = () => {
+      console.log('[Editor] WebSocket connected to overlay:', currentId);
+    };
+
+    wsRef.current = ws;
+    return () => ws.close();
+  }, [currentId, isNew]);
+
+  // Load overlay from API
   useEffect(() => {
     if (!isNew) {
-      const baseUrl = window.location.port === '4321' ? 'http://localhost:3001' : '';
-      fetch(`${baseUrl}/api/overlays/${id}`)
-        .then(res => res.json())
+      getOverlay(id)
         .then(data => {
           setForm({
             name: data.name,
@@ -100,31 +121,40 @@ export default function OverlayEditor() {
     setSaving(true);
     setSaved(false);
     try {
-      const baseUrl = window.location.port === '4321' ? 'http://localhost:3001' : '';
       const method = isNew ? 'POST' : 'PUT';
-      const url = isNew ? `${baseUrl}/api/overlays` : `${baseUrl}/api/overlays/${id}`;
+      const payload = {
+        name: form.name,
+        type: form.type,
+        data: form.data,
+        elements: form.elements,
+        tags: form.tags,
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name,
-          type: form.type,
-          data: form.data,
-          elements: form.elements,
-          tags: form.tags,
-        }),
-      });
-
-      if (res.ok) {
-        setSaved(true);
-        if (isNew) {
-          const created = await res.json();
-          const newUrl = `/editor?id=${created.id}`;
-          window.history.replaceState(null, '', newUrl);
-        }
-        setTimeout(() => setSaved(false), 3000);
+      let savedId = currentId;
+      if (isNew) {
+        const created = await createOverlay(payload);
+        savedId = created.id;
+        setCurrentId(savedId);
+        const newUrl = `/editor?id=${savedId}`;
+        window.history.replaceState(null, '', newUrl);
+      } else {
+        await updateOverlay(currentId, payload);
       }
+
+      setSaved(true);
+
+      // Send WebSocket update to live overlay
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        const updateMsg = {
+          type: 'overlay:update',
+          overlayId: savedId,
+          data: form.data,
+        };
+        wsRef.current.send(JSON.stringify(updateMsg));
+        console.log('[Editor] Sent WebSocket update:', updateMsg);
+      }
+
+      setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error('Save failed:', err);
     } finally {
@@ -134,8 +164,25 @@ export default function OverlayEditor() {
 
   const selectedElement = form.elements?.find(el => el.id === selectedId) || null;
 
+  function handleTemplateSelect(type: OverlayType, templateName: string) {
+    setForm({
+      name: templateName,
+      type,
+      data: getDefaultConfig(type),
+      elements: getDefaultElements(type),
+      tags: [],
+    });
+    setShowTemplatePicker(false);
+  }
+
   return (
     <div className="flex flex-col h-full">
+      {showTemplatePicker && (
+        <TemplatePicker
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-4">
@@ -145,6 +192,14 @@ export default function OverlayEditor() {
           <span className="text-xs px-2 py-1 bg-indigo-900/50 text-indigo-300 rounded">
             {OVERLAY_TYPE_LABELS[form.type as OverlayType] || form.type}
           </span>
+          {!isNew && (
+            <button
+              onClick={() => setShowTemplatePicker(true)}
+              className="text-xs text-gray-500 hover:text-gray-300 ml-2"
+            >
+              Change template →
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <button

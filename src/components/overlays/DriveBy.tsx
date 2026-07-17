@@ -104,15 +104,3 @@ export function DriveBy({ config: initialConfig, overlayId }: DriveByProps) {
     </div>
   );
 }
-
-// Estilos para DriveBy (se agregan al CSS)
-export const DRIVEBY_CSS = `
-@keyframes ol-driveby-left {
-  0%   { transform: translateX(110%); }
-  100% { transform: translateX(-110%); }
-}
-@keyframes ol-driveby-right {
-  0%   { transform: translateX(-110%); }
-  100% { transform: translateX(110%); }
-}
-`;

@@ -15,16 +15,10 @@
     "baseUrl": ".",
     "typeRoots": ["node_modules/@types"]
   },
-  "include": ["src"],
+  "include": ["src", "server", "tools"],
   "exclude": [
     "node_modules",
     "dist",
     ".astro",
-    "server",
-    "src/components/editor",
-    "src/components/library",
-    "src/components/controls",
-    "src/components/overlays/LowerThirdOverlay.tsx",
-    "src/components/overlays/TimerOverlay.tsx"
   ]
 }

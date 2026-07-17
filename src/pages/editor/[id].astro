@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import OverlayEditor from '../../components/editor/OverlayEditor';
+import type { OverlayConfig } from '../../lib/types';
+
+export function getStaticPaths() {
+  // Dynamic route — no static paths needed
+  return [];
+}
+
+const { id } = Astro.params;
+const overlayId = id || 'new';
+---
+
+<BaseLayout title="br1cg — Editor">
+  <OverlayEditor client:only="react" />
+</BaseLayout>

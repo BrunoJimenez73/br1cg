@@ -126,5 +126,61 @@
     "track": "parallel-library",
     "status": "done",
     "depends_on": [105]
+  },
+  {
+    "id": 201,
+    "title": "[REF] Limpieza de dead code y bugs menores",
+    "description": "Eliminar componentes legacy (LowerThirdOverlay, TimerOverlay), exports muertos (useTimerControls, DRIVEBY_CSS, MONEY_EFFECT_CSS), completar LayerPanel (botones moveUp/moveDown), fix Math.random en MoneyEffect render",
+    "track": "refactor",
+    "status": "done",
+    "depends_on": []
+  },
+  {
+    "id": 202,
+    "title": "[REF] Bugs críticos: command:update + WS reconnect + ControlDashboard",
+    "description": "Agregar command:update a ScoreBug/SponsorLogo/WebcamBorder/WeatherBug/YTViewCount, reconexión WS con backoff en useWebSocket, extraer nested components de ControlDashboard",
+    "track": "refactor",
+    "status": "done",
+    "depends_on": [201]
+  },
+  {
+    "id": 203,
+    "title": "[REF] Arquitectura: API routes modulares + validación",
+    "description": "Extraer API routes de server/index.ts a server/routes/overlays.ts y server/routes/templates.ts, agregar validación de entrada, corregir AGENTS.md, unificar sistema de animaciones",
+    "track": "refactor",
+    "status": "pending",
+    "depends_on": [202]
+  },
+  {
+    "id": 204,
+    "title": "[REF] Calidad: Error boundaries + presets + JSDoc",
+    "description": "ErrorBoundary para overlays, fix Ticker estado redundante, agregar presets para 11 tipos faltantes, JSDoc en funciones clave de server y lib",
+    "track": "refactor",
+    "status": "pending",
+    "depends_on": [202]
+  },
+  {
+    "id": 205,
+    "title": "[REF] Tests: hooks + API + utils",
+    "description": "Tests para useWebSocket, usePreciseTimer, endpoints REST (CRUD overlay), utils (rowToOverlay, getDefaultConfig)",
+    "track": "refactor",
+    "status": "pending",
+    "depends_on": [203, 204]
+  },
+  {
+    "id": 206,
+    "title": "[REF] Features: Export/Import + Backup automático",
+    "description": "GET /api/overlays/export (JSON), POST /api/overlays/import, botones en Library, backup de SQLite antes de migraciones",
+    "track": "refactor",
+    "status": "pending",
+    "depends_on": [203]
+  },
+  {
+    "id": 207,
+    "title": "[REF] Documentación: actualizar docs + checkpoints + history",
+    "description": "Actualizar AGENTS.md, docs/architecture.md, docs/conventions.md, CHECKPOINTS.md, progress/history.md con todo el refactor",
+    "track": "refactor",
+    "status": "pending",
+    "depends_on": [206]
   }
 ]

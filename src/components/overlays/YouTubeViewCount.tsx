@@ -40,6 +40,7 @@ function formatCount(n: number, format: 'compact' | 'full'): string {
 
 export function YouTubeViewCount({ config: initialConfig, overlayId }: YouTubeViewCountProps) {
   const [visible, setVisible] = useState(true);
+  const [live, setLive] = useState<Partial<YouTubeViewCountConfig>>({});
   const [displayCount, setDisplayCount] = useState(0);
   const animRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
   const targetRef = useRef(0);
@@ -55,8 +56,8 @@ export function YouTubeViewCount({ config: initialConfig, overlayId }: YouTubeVi
       format: 'compact',
       position: 'top-right',
     };
-    return { ...base, ...initialConfig };
-  }, [initialConfig]);
+    return { ...base, ...initialConfig, ...live };
+  }, [initialConfig, live]);
 
   // Animación de conteo
   useEffect(() => {
@@ -84,8 +85,11 @@ export function YouTubeViewCount({ config: initialConfig, overlayId }: YouTubeVi
   useWebSocket({
     overlayId,
     onMessage: (msg) => {
-      if (msg.type === 'command' && msg.action === 'show') setVisible(true);
-      else if (msg.type === 'command' && msg.action === 'hide') setVisible(false);
+      if (msg.type === 'command') {
+        if (msg.action === 'show') setVisible(true);
+        else if (msg.action === 'hide') setVisible(false);
+        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
+      }
     },
   });
 

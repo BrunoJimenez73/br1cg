@@ -1,134 +1,92 @@
-// ──────────────────────────────────────────────
-// br1cg — Seed script: Crea overlays de ejemplo
-// ──────────────────────────────────────────────
+#!/usr/bin/env bun
+/**
+ * br1cg — Database seed script
+ * Puebla la base de datos con overlays de ejemplo para desarrollo.
+ *
+ * Uso: bun run db:seed
+ */
 
-import { v4 as uuid } from 'uuid';
-import { createOverlay, getAllOverlays, getDb } from './db';
-import { LOWER_THIRD_PRESETS, TIMER_PRESETS, TICKER_PRESETS, SCOREBUG_PRESETS } from '../src/lib/presets';
-import { getDefaultElements } from '../src/lib/defaults';
-import { STREAM_PACKS } from '../src/lib/pack-presets';
-import type { OverlayConfig, OverlayType } from '../src/lib/types';
+import { Database } from 'bun:sqlite';
+import path from 'path';
 
-function createOverlayFromPreset(
-  name: string,
-  type: OverlayType,
-  data: Record<string, unknown>,
-  tags: string[] = []
-): OverlayConfig {
-  const now = new Date().toISOString();
-  return {
-    id: uuid(),
-    name,
-    type,
-    data: data as OverlayConfig['data'],
-    elements: getDefaultElements(type),
-    tags,
-    favorite: false,
-    createdAt: now,
-    updatedAt: now,
-  };
+const DB_PATH = path.join(import.meta.dirname, '..', 'data', 'store.db');
+const db = new Database(DB_PATH);
+
+// Crear tablas si no existen
+db.run(`
+  CREATE TABLE IF NOT EXISTS overlay_configs (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    data TEXT NOT NULL DEFAULT '{}',
+    elements TEXT,
+    tags TEXT NOT NULL DEFAULT '[]',
+    favorite INTEGER NOT NULL DEFAULT 0
+  )
+`);
+
+const overlays = [
+  {
+    id: 'timer-1',
+    name: 'Countdown 5min',
+    type: 'timer',
+    data: { minutes: 5, seconds: 0, mode: 'countdown', format: 'mm:ss', autoStart: false, bgColor: '#000000', textColor: '#ffffff', fontSize: '72px', showMillis: false, onComplete: 'stop' },
+    tags: ['countdown', 'principal'],
+  },
+  {
+    id: 'lower-1',
+    name: 'Presentador Principal',
+    type: 'lower-third',
+    data: { title: 'Juan Pérez', subtitle: 'Ingeniero de Software', bgColor: '#1a1a2e', textColor: '#ffffff', accentColor: '#ff6b35', animation: 'slide-left', duration: 0, position: 'bottom-left' },
+    tags: ['presentador'],
+  },
+  {
+    id: 'lower-2',
+    name: 'Invitado Especial',
+    type: 'lower-third',
+    data: { title: 'María García', subtitle: 'Diseñadora UX', bgColor: '#0f172a', textColor: '#ffffff', accentColor: '#3b82f6', animation: 'slide-right', duration: 0, position: 'bottom-left' },
+    tags: ['invitado'],
+  },
+  {
+    id: 'scorebug-1',
+    name: 'Marcador Fútbol',
+    type: 'scorebug',
+    data: { sport: 'soccer', homeTeam: { name: 'HOME', abbrev: 'HOM', score: 2, color: '#3b82f6' }, awayTeam: { name: 'AWAY', abbrev: 'AWY', score: 1, color: '#ef4444' }, period: '2T', periodTime: '35:00', bgColor: '#111827', textColor: '#ffffff', accentColor: '#3b82f6', showSport: true, showTime: true },
+    tags: ['deportes'],
+  },
+  {
+    id: 'ticker-1',
+    name: 'Noticias',
+    type: 'ticker',
+    data: { messages: ['Bienvenidos a la transmisión', 'Síguenos en redes sociales @br1cg', 'Nuevo episodio cada viernes'], speed: 80, separator: '•', bgColor: '#000000', textColor: '#ffffff', fontSize: 18, height: 40, animation: 'scroll', position: 'bottom' },
+    tags: ['informativo'],
+  },
+  {
+    id: 'alert-1',
+    name: 'Alerta Genérica',
+    type: 'alert',
+    data: { message: '¡Nuevo mensaje!', submessage: 'Gracias por tu apoyo', icon: '🔔', duration: 5000, position: 'top', animation: 'bounce-in', bgColor: '#7c3aed', textColor: '#ffffff', accentColor: '#a78bfa', fontSize: 48 },
+    tags: ['alertas'],
+  },
+];
+
+const insert = db.prepare(`
+  INSERT OR REPLACE INTO overlay_configs (id, name, type, data, elements, tags, favorite)
+  VALUES ($id, $name, $type, $data, $elements, $tags, 0)
+`);
+
+for (const overlay of overlays) {
+  insert.run({
+    $id: overlay.id,
+    $name: overlay.name,
+    $type: overlay.type,
+    $data: JSON.stringify(overlay.data),
+    $elements: null,
+    $tags: JSON.stringify(overlay.tags),
+  });
+  console.log(`  ✓ ${overlay.id} — ${overlay.name}`);
 }
 
-function seed(): void {
-  console.log('🌱 Seeding br1cg database...\n');
-
-  // Check if already seeded
-  const existing = getAllOverlays();
-  if (existing.length > 0) {
-    console.log(`⚠️  Database already has ${existing.length} overlays.`);
-    console.log('   Run with --force to reseed.\n');
-    if (!process.argv.includes('--force')) {
-      return;
-    }
-    console.log('   --force flag detected, clearing and reseeding...\n');
-    // Clear existing
-    getDb().run('DELETE FROM overlays');
-  }
-
-  let count = 0;
-
-  // ─── Lower Thirds ───
-  console.log('📌 Lower Thirds...');
-  for (const preset of LOWER_THIRD_PRESETS) {
-    const overlay = createOverlayFromPreset(
-      `LT: ${preset.name}`,
-      'lower-third',
-      preset.config as Record<string, unknown>,
-      ['preset', 'lower-third', preset.name.toLowerCase()]
-    );
-    createOverlay(overlay);
-    count++;
-    console.log(`   ✅ ${preset.name}`);
-  }
-
-  // ─── Timers ───
-  console.log('⏱️  Timers...');
-  for (const preset of TIMER_PRESETS) {
-    const overlay = createOverlayFromPreset(
-      `Timer: ${preset.name}`,
-      'timer',
-      preset.config as Record<string, unknown>,
-      ['preset', 'timer', preset.name.toLowerCase()]
-    );
-    createOverlay(overlay);
-    count++;
-    console.log(`   ✅ ${preset.name}`);
-  }
-
-  // ─── Tickers ───
-  console.log('📰 Tickers...');
-  for (const preset of TICKER_PRESETS) {
-    const overlay = createOverlayFromPreset(
-      `Ticker: ${preset.name}`,
-      'ticker',
-      preset.config as Record<string, unknown>,
-      ['preset', 'ticker', preset.name.toLowerCase()]
-    );
-    createOverlay(overlay);
-    count++;
-    console.log(`   ✅ ${preset.name}`);
-  }
-
-  // ─── Scorebugs ───
-  console.log('⚽ Scorebugs...');
-  for (const preset of SCOREBUG_PRESETS) {
-    const overlay = createOverlayFromPreset(
-      `Scorebug: ${preset.name}`,
-      'scorebug',
-      preset.config as Record<string, unknown>,
-      ['preset', 'scorebug', preset.name.toLowerCase()]
-    );
-    createOverlay(overlay);
-    count++;
-    console.log(`   ✅ ${preset.name}`);
-  }
-
-  // ─── Stream Packs (one overlay per pack as example) ───
-  console.log('🎨 Stream Packs...');
-  for (const [id, pack] of Object.entries(STREAM_PACKS)) {
-    // Create a lower-third using the pack's colors
-    const overlay = createOverlayFromPreset(
-      `Pack: ${pack.name}`,
-      'lower-third',
-      {
-        title: pack.name,
-        subtitle: pack.description,
-        bgColor: pack.colors.muted,
-        textColor: pack.colors.primary,
-        accentColor: pack.colors.accent,
-        animation: 'slide-left',
-        duration: 0,
-        position: 'bottom-left',
-      },
-      ['preset', 'stream-pack', id]
-    );
-    createOverlay(overlay);
-    count++;
-    console.log(`   ✅ ${pack.name}`);
-  }
-
-  console.log(`\n🎉 Seeded ${count} overlays successfully!`);
-  console.log('   Open http://localhost:3001 to see them.\n');
-}
-
-seed();
+console.log(`\n✅ Seed completado: ${overlays.length} overlays insertados.`);

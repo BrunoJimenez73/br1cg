@@ -33,6 +33,15 @@ Los componentes en `src/components/overlays/` son el **corazón del sistema**. D
    - Sus props de configuración
 2. **Ser puramente visuales**: No tienen estado de aplicación, solo estado de animación local.
 3. **Usar Tailwind + CSS animations**: Evitar runtime CSS-in-JS en overlays (mejor performance en Browser Source).
+4. **Soportar `command:update`**: Todo overlay DEBE manejar el mensaje `command:update` para que los cambios desde el editor se reflejen en vivo. Usar el patrón de `liveConfig` state + merge con defaults.
+5. **No usar `Math.random()` en render**: Calcular valores aleatorios con `useMemo` o `useRef` al montar.
+
+## Server / API Routes
+
+- Las rutas API van en `server/routes/` (un archivo por dominio: `overlays.ts`, `templates.ts`).
+- `server/index.ts` solo maneja: serve, WS, y dispatch a routes.
+- Validar entrada en POST/PUT antes de persistir.
+- Usar `corsHeaders` de helper centralizado.
 
 ## Mensajes WebSocket
 

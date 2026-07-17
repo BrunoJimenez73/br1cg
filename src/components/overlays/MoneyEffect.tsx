@@ -23,7 +23,7 @@ interface MoneyEffectProps {
 }
 
 function Particle({ index, color }: { index: number; color: string }) {
-  const style: React.CSSProperties = {
+  const style = useMemo<React.CSSProperties>(() => ({
     position: 'absolute',
     fontSize: 16 + Math.random() * 24,
     color,
@@ -34,7 +34,7 @@ function Particle({ index, color }: { index: number; color: string }) {
     transform: `rotate(${Math.random() * 360}deg)`,
     pointerEvents: 'none',
     userSelect: 'none',
-  };
+  }), [color]);
   return <div style={style}>{['$', '€', '₿', '¢', '₮', '★'][index % 6]}</div>;
 }
 
@@ -124,12 +124,4 @@ export function MoneyEffect({ config: initialConfig, overlayId }: MoneyEffectPro
   );
 }
 
-// Estilos para las partículas (se agregan al CSS global)
-export const MONEY_EFFECT_CSS = `
-@keyframes ol-money-fall {
-  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-}
-`;
+// Estilos para las partículas (ya definidos en animations.css: ol-money-fall)

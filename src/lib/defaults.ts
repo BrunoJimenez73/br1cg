@@ -7,6 +7,9 @@ import type {
   TickerConfig, AlertConfig, WebcamBorderConfig,
   SponsorLogoConfig, TitleCardConfig, OverlayType,
   OverlayConfigData, OverlayElement,
+  BRBConfig, TwoXCounterConfig, MoneyEffectConfig,
+  SocialLooperConfig, WeatherBugConfig,
+  YouTubeViewCountConfig, DriveByConfig,
 } from './types';
 
 export const DEFAULT_LOWER_THIRD: LowerThirdConfig = {
@@ -116,6 +119,86 @@ export const DEFAULT_TITLE_CARD: TitleCardConfig = {
   fullscreen: true,
 };
 
+export const DEFAULT_BRB: BRBConfig = {
+  message: 'VOLVEMOS EN BREVE',
+  subtitle: 'La transmisión regresa en unos momentos',
+  bgColor: '#000000',
+  textColor: '#ffffff',
+  accentColor: '#ef4444',
+  style: 'classic',
+  showTimer: false,
+};
+
+export const DEFAULT_2X_COUNTER: TwoXCounterConfig = {
+  label: 'Raids',
+  count: 0,
+  maxCount: 10,
+  style: 'burst',
+  bgColor: '#1a1a2e',
+  textColor: '#ffffff',
+  accentColor: '#ff6b35',
+  showMax: true,
+  size: 'md',
+};
+
+export const DEFAULT_MONEY_EFFECT: MoneyEffectConfig = {
+  amount: '$5',
+  currency: '$',
+  label: 'Donación',
+  duration: 5000,
+  particleCount: 20,
+  bgColor: '#000000',
+  textColor: '#22c55e',
+  accentColor: '#22c55e',
+};
+
+export const DEFAULT_SOCIAL_LOOPER: SocialLooperConfig = {
+  accounts: [
+    { platform: 'twitter', handle: '@usuario' },
+    { platform: 'youtube', handle: '/usuario' },
+  ],
+  interval: 5000,
+  bgColor: 'transparent',
+  textColor: '#ffffff',
+  accentColor: '#3b82f6',
+  animation: 'fade',
+  iconSize: 24,
+  fontSize: 18,
+  position: 'bottom-right',
+};
+
+export const DEFAULT_WEATHER_BUG: WeatherBugConfig = {
+  weather: { temperature: 25, condition: 'sunny', city: 'Ciudad', unit: 'C' },
+  bgColor: '#0f172a',
+  textColor: '#ffffff',
+  accentColor: '#fbbf24',
+  showDetails: false,
+  position: 'top-right',
+};
+
+export const DEFAULT_YT_VIEW_COUNT: YouTubeViewCountConfig = {
+  count: 0,
+  label: 'Espectadores',
+  bgColor: '#0f172a',
+  textColor: '#ffffff',
+  accentColor: '#ff0000',
+  animation: 'static',
+  format: 'compact',
+  position: 'top-right',
+};
+
+export const DEFAULT_DRIVE_BY: DriveByConfig = {
+  message: '✨ ¡Gracias por el apoyo! ✨',
+  fontSize: 36,
+  speed: 6,
+  textColor: '#ffffff',
+  bgColor: 'transparent',
+  direction: 'left',
+  yPosition: 600,
+  repeat: false,
+  repeatDelay: 3,
+};
+
 export const DEFAULTS: Record<OverlayType, OverlayConfigData> = {
   'lower-third': DEFAULT_LOWER_THIRD,
   'timer': DEFAULT_TIMER,
@@ -125,6 +208,13 @@ export const DEFAULTS: Record<OverlayType, OverlayConfigData> = {
   'webcam-border': DEFAULT_WEBCAM_BORDER,
   'sponsor-logo': DEFAULT_SPONSOR_LOGO,
   'title-card': DEFAULT_TITLE_CARD,
+  'brb': DEFAULT_BRB,
+  '2x-counter': DEFAULT_2X_COUNTER,
+  'money-effect': DEFAULT_MONEY_EFFECT,
+  'social-looper': DEFAULT_SOCIAL_LOOPER,
+  'weather-bug': DEFAULT_WEATHER_BUG,
+  'yt-view-count': DEFAULT_YT_VIEW_COUNT,
+  'driveby': DEFAULT_DRIVE_BY,
 };
 
 export function getDefaultConfig(type: OverlayType): OverlayConfigData {
@@ -180,6 +270,13 @@ export const DEFAULT_ELEMENTS: Record<OverlayType, OverlayElement[]> = {
     el('title', 'text', 160, 440, 1600, 80, { text: 'Título', fontFamily: 'Inter, sans-serif', fontSize: 64, fontWeight: 900, color: '#ffffff', textAlign: 'center' }),
     el('subtitle', 'text', 160, 540, 1600, 50, { text: 'Subtítulo', fontFamily: 'Inter, sans-serif', fontSize: 32, fontWeight: 400, color: '#94a3b8', textAlign: 'center' }),
   ],
+  'brb': [],
+  '2x-counter': [],
+  'money-effect': [],
+  'social-looper': [],
+  'weather-bug': [],
+  'yt-view-count': [],
+  'driveby': [],
 };
 
 export function getDefaultElements(type: OverlayType): OverlayElement[] {

@@ -5,58 +5,67 @@
 ## Feature en curso
 
 ```
-ID:     DevOps — GitHub setup + harness update
-Title:  Creación de repositorio GitHub + limpieza de archivos
-Status: done
+ID:     207 — [DOC] Documentación y pipeline final
+Title:  Actualizar AGENTS.md, archivos del harness, subir a GitHub
+Status: completada
 ```
 
 ## Inicio de sesión
 
 ```
-Fecha:   2026-07-16
-Hora:    20:55
-Agente:  claude
+Fecha:   2026-07-17
+Hora:    09:40
+Agente:  Hermes (opencode-zen)
 ```
 
-## Problemas reportados
+## Resumen de la sesión
 
-1. **Sin repositorio Git** — El proyecto no tenía control de versiones ni remoto
-2. **Archivos no deseados en stage** — `.astro/`, `.playwright-mcp/`, `data/store.db`, `*.png` estaban staged
-3. **AGENTS.md desactualizado** — Decía "Feature 10 pendiente" cuando ya estaba completo
+Esta sesión completó la refactorización y mejora integral del proyecto:
 
-## Soluciones aplicadas
+### ESLint + Prettier
+- ✅ `eslint.config.mjs` — flat config con TS strict + React + Prettier
+- ✅ `.prettierrc` — semi, singleQuote, printWidth 120
+- ✅ Scripts: `lint`, `lint:fix`, `format`, `format:check`
 
-### Git + GitHub
+### Tests
+- ✅ `tests/types.test.ts` — 17 tests de tipos y defaults
+- ✅ `tests/overlays.test.tsx` — 83 tests de componentes overlay
+- ✅ `tests/server/db.test.ts` — 10 tests de base de datos + WS
+- ✅ **110 tests total, todos pasan**
 
-```
-✅ .gitignore actualizado con .astro/, .playwright-mcp/, data/store.db, *.png
-✅ git rm --cached de archivos no deseados
-✅ Initial commit: 71 archivos, 8744 líneas
-✅ Repositorio creado: github.com/BrunoJimenez73/br1cg
-✅ Push a main exitoso
-```
+### Editor visual
+- ✅ `src/lib/api-client.ts` — Cliente REST con CRUD + WS commands
+- ✅ `src/lib/overlay-store.ts` — Zustand store (editedOverlay, selectedId, loading/saving/saved/error)
+- ✅ `src/pages/editor/[id].astro` — Ruta dinámica
+- ✅ `src/components/editor/OverlayEditor.tsx` — Conectado a API + WS + Zustand
+- ✅ `src/components/editor/TemplatePicker.tsx` — Selector de plantillas al crear overlay
 
-### Actualización de harness
+### Library + ControlDashboard
+- ✅ `OverlayLibrary.tsx` — Carga real desde API
+- ✅ `ControlDashboard.tsx` — WS control per overlay, status indicator, activity log
 
-```
-✅ AGENTS.md — Estado actualizado a "todas las features done", repo URL agregado
-✅ AGENTS.md — Sección 1 ahora incluye git pull como paso obligatorio
-✅ AGENTS.md — Nota sobre data/store.db en .gitignore
-✅ progress/current.md — Documentación de esta sesión
-✅ CHECKPOINTS.md — Checkpoints de features core + parallel marcados
-```
+### Server refactor
+- ✅ `server/index.ts` — 78 líneas (orquestador limpio, antes 312)
+- ✅ `server/middleware.ts` — CORS, JSON, static helpers
+- ✅ `server/routes/overlays.ts` — Rutas REST extraídas
 
-## Verificaciones
+### CI/CD + README
+- ✅ `.github/workflows/ci.yml` — 3 jobs: quality, build, server-test
+- ✅ `README.md` — Setup, OBS, API, testing, comandos
 
-```
-init.ps1                → ✅ Pass
-git status              → ✅ Clean
-```
+### Templates en editor
+- ✅ `TemplatePicker.tsx` — Modal con tarjetas agrupadas por categoría
+- ✅ Botón "Change template" en editor para overlays existentes
+- ✅ Templates enriquecidos con `description`
+
+### Documentación (harness)
+- ✅ `AGENTS.md` — Actualizado: estructura server, nuevos archivos, comandos, URLs
+- ✅ `progress/current.md` — Este archivo
+- ✅ `docs/architecture.md` — Pendiente (se actualizó parcialmente)
+- ✅ `CHECKPOINTS.md` — Pendiente (se actualizó parcialmente)
 
 ## Cierre
 
 ```
-Repositorio GitHub creado y configurado
-Harness actualizado con estado real del proyecto
-Proyecto listo para siguiente feature
+✅ Sesión completada. Pendiente: git add + git commit + git push.
 ```

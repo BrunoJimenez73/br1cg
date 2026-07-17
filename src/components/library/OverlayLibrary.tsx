@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { OverlayConfig } from '../../lib/types';
 import { OVERLAY_TYPE_LABELS } from '../../lib/types';
+import * as api from '../../lib/api-client';
 
 export default function OverlayLibrary() {
   const [overlays, setOverlays] = useState<OverlayConfig[]>([]);
@@ -15,9 +16,7 @@ export default function OverlayLibrary() {
   async function fetchOverlays() {
     try {
       setLoading(true);
-      const res = await fetch(`${getBaseUrl()}/api/overlays`);
-      if (!res.ok) throw new Error('Error fetching overlays');
-      const data = await res.json();
+      const data = await api.getOverlays();
       setOverlays(data);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -31,20 +30,14 @@ export default function OverlayLibrary() {
     }
   }
 
-  function getBaseUrl(): string {
-    if (typeof window === 'undefined') return '';
-    return window.location.port === '4321' ? 'http://localhost:3001' : '';
-  }
-
   const filtered = overlays.filter(o =>
     o.name.toLowerCase().includes(filter.toLowerCase()) ||
     o.type.toLowerCase().includes(filter.toLowerCase())
   );
 
-  async function deleteOverlay(id: string) {
+  async function handleDelete(id: string) {
     try {
-      const res = await fetch(`${getBaseUrl()}/api/overlays/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Error deleting');
+      await api.deleteOverlay(id);
       setOverlays(prev => prev.filter(o => o.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error');
@@ -106,7 +99,7 @@ export default function OverlayLibrary() {
                   {OVERLAY_TYPE_LABELS[overlay.type] || overlay.type}
                 </span>
                 <button
-                  onClick={() => deleteOverlay(overlay.id)}
+                  onClick={() => handleDelete(overlay.id)}
                   className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all text-sm"
                 >
                   ✕

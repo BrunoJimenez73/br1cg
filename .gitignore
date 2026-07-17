@@ -42,5 +42,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # SQLite database
 data/store.db
 
+# Lock files
+bun.lock
+package-lock.json
+
 # Screenshots
 *.png

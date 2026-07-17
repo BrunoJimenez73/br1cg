@@ -5,11 +5,12 @@ interface SponsorLogoProps { config?: Partial<SponsorLogoConfig>; overlayId?: st
 
 export function SponsorLogo({ config: c, overlayId }: SponsorLogoProps) {
   const [visible, setVisible] = useState(true);
+  const [live, setLive] = useState<Partial<SponsorLogoConfig>>({});
   const cfg = useMemo<SponsorLogoConfig>(() => ({
     logoUrl: '', name: 'Sponsor', width: 200, height: 80,
     position: 'bottom-right', bgColor: 'transparent', opacity: 0.8,
-    ...c
-  }), [c]);
+    ...c, ...live
+  }), [c, live]);
 
   useWebSocket({
     overlayId,
@@ -17,6 +18,7 @@ export function SponsorLogo({ config: c, overlayId }: SponsorLogoProps) {
       if (msg.type === 'command') {
         if (msg.action === 'show') setVisible(true);
         else if (msg.action === 'hide') setVisible(false);
+        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
       }
     },
   });

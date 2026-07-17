@@ -49,6 +49,7 @@ const POSITION_STYLES: Record<string, React.CSSProperties> = {
 
 export function WeatherBug({ config: initialConfig, overlayId }: WeatherBugProps) {
   const [visible, setVisible] = useState(true);
+  const [live, setLive] = useState<Partial<WeatherBugConfig>>({});
 
   const mergedConfig = useMemo<WeatherBugConfig>(() => {
     const base: WeatherBugConfig = {
@@ -64,17 +65,16 @@ export function WeatherBug({ config: initialConfig, overlayId }: WeatherBugProps
       showDetails: false,
       position: 'top-right',
     };
-    return { ...base, ...initialConfig };
-  }, [initialConfig]);
+    return { ...base, ...initialConfig, ...live };
+  }, [initialConfig, live]);
 
   useWebSocket({
     overlayId,
     onMessage: (msg) => {
       if (msg.type === 'command') {
-        switch (msg.action) {
-          case 'show': setVisible(true); break;
-          case 'hide': setVisible(false); break;
-        }
+        if (msg.action === 'show') setVisible(true);
+        else if (msg.action === 'hide') setVisible(false);
+        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
       }
     },
   });

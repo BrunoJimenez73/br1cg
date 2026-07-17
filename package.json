@@ -6,14 +6,35 @@
   "scripts": {
     "dev:astro": "astro dev",
     "dev:server": "bun --watch server/index.ts",
-    "dev": "bun run dev:server && bun run dev:astro",
+    "dev": "bun run tools/dev.js",
     "dev:all": "bun run dev:server & bun run dev:astro",
     "build": "astro build",
     "start": "bun server/index.ts",
-    "db:seed": "bun server/seed.ts"
+    "db:seed": "bun server/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:server": "bun test tests/server/",
+    "test:all": "vitest run && bun test tests/server/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css}\""
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/parser": "^8.64.0",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-react": "^7.37.5",
+    "happy-dom": "^20.10.6",
+    "prettier": "^3.9.5",
+    "typescript-eslint": "^8.64.0",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -26,6 +47,7 @@
     "postcss": "8.4.49",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-rnd": "^10.5.3",
     "tailwindcss": "3.4.17",
     "uuid": "^14.0.1",
     "zustand": "^5.0.14"

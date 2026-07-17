@@ -51,6 +51,20 @@ export default function LayerPanel({ elements, selectedId, onSelect, onUpdate }:
           <span className="w-5 text-center">{TYPE_ICONS[el.type] || '?'}</span>
           <span className="flex-1 truncate">{el.type === 'text' ? (el.props.text as string) || 'Text' : el.type}</span>
           <button
+            onClick={(e) => { e.stopPropagation(); moveUp(el); }}
+            className="opacity-60 hover:opacity-100"
+            title="Move up"
+          >
+            ↑
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); moveDown(el); }}
+            className="opacity-60 hover:opacity-100"
+            title="Move down"
+          >
+            ↓
+          </button>
+          <button
             onClick={(e) => { e.stopPropagation(); onUpdate(el.id, { visible: !el.visible }); }}
             className={`opacity-60 hover:opacity-100 ${el.visible ? '' : 'text-red-400'}`}
             title={el.visible ? 'Hide' : 'Show'}

@@ -76,3 +76,17 @@ Servidor WS
 Cada overlay se conecta con ?subscribe=timer-1 en la URL.
 El servidor mantiene Map<roomId, Set<WebSocket>>.
 ```
+
+## Estado del refactor (Features 201-207)
+
+Plan detallado: `thoughts/shared/plans/PL-02-refactor-quality.md`
+
+| Fase | Cambio | Estado |
+|------|--------|--------|
+| 201 | Limpieza de dead code (legacy components, exports muertos) | ✅ Completado |
+| 202 | Bugs críticos (command:update, WS reconnect, ControlDashboard) | ✅ Completado |
+| 203 | API routes modulares (`server/routes/`), validación de entrada | ✅ Completado |
+| 204 | Error boundaries, presets completos, JSDoc | ⏳ Pendiente |
+| 205 | Tests (componentes, API, tipos) | ✅ Completado (110 tests) |
+| 206 | Export/Import + Backup automático | ⏳ Pendiente |
+| 207 | Documentación actualizada | ✅ Parcial (AGENTS.md + progress) |
