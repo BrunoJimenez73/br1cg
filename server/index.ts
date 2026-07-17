@@ -66,6 +66,7 @@ const server = serve({
       url.pathname.startsWith('/overlay/') ||
       url.pathname.startsWith('/control') ||
       url.pathname.startsWith('/editor') ||
+      url.pathname.startsWith('/_assets/') ||
       url.pathname === '/';
 
     if (isStaticPath) {

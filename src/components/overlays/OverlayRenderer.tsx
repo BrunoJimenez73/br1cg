@@ -10,6 +10,7 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
   const [overlayId, setOverlayId] = useState<string | undefined>();
   const [config, setConfig] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -24,6 +25,11 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
         .then(data => {
           if (data && data.data) {
             setConfig(data.data);
+            // Extract position from first element if available
+            if (data.elements && data.elements.length > 0) {
+              const el = data.elements[0];
+              setPosition({ x: el.x || 0, y: el.y || 0 });
+            }
           }
           setLoading(false);
         })
@@ -50,5 +56,12 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
     return null;
   }
 
-  return <Component overlayId={overlayId} config={config} />;
+  return (
+    <div style={{
+      position: 'absolute', left: position.x, top: position.y,
+      width: 1920, height: 1080, overflow: 'hidden',
+    }}>
+      <Component overlayId={overlayId} config={config} />
+    </div>
+  );
 }

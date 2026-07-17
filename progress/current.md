@@ -69,3 +69,18 @@ Esta sesión completó la refactorización y mejora integral del proyecto:
 ```
 ✅ Sesión completada. Pendiente: git add + git commit + git push.
 ```
+
+---
+
+## Post-sesión: Fixes timer overlay + WS
+
+Después de la sesión principal se detectaron y corrigieron:
+
+- **CSS/JS no cargaban** — Añadido `/_assets/` a las rutas estáticas en `server/index.ts`
+- **Timer ignoraba eventos WS** — Añadido handler para `type:'event'` con `timer:start/pause/reset` en `Timer.tsx`
+- **Código duplicado** en `Timer.tsx` — Limpiado leftover de patch roto
+- **Posición timer** — OverlayRenderer usa `left:0; top:0` en vez de centrado
+- **110/110 tests OK**, build OK (18 páginas, 0 errores)
+- El snapshot browser es "empty page" pero es limitación de la herramienta — el DOM sí renderiza
+
+Pendiente: No se puede probar WS cross-tab en esta sesión (browser tool single-tab). Para probar: abrir overlay en OBS y dashboard en navegador.
