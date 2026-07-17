@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { OVERLAY_COMPONENTS, type ExtendedOverlayType } from './index';
+import OverlayErrorBoundary from './ErrorBoundary';
 
 interface OverlayRendererProps {
   type: string;
@@ -96,7 +97,9 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
       position: 'absolute', left: position.x, top: position.y,
       width: 1920, height: 1080, overflow: 'hidden',
     }}>
-      <Component overlayId={overlayId} config={config} />
+      <OverlayErrorBoundary type={type}>
+        <Component overlayId={overlayId} config={config} />
+      </OverlayErrorBoundary>
     </div>
   );
 }

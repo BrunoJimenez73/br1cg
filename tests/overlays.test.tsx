@@ -424,3 +424,66 @@ describe('DriveBy', () => {
     cleanup();
   });
 });
+
+// ──────────────────────────────────────────────
+// ErrorBoundary tests
+// ──────────────────────────────────────────────
+import OverlayErrorBoundary from '../src/components/overlays/ErrorBoundary';
+
+function ThrowingComponent() {
+  throw new Error('Test crash!');
+}
+
+function WorkingComponent() {
+  return <div data-testid="ok">Works!</div>;
+}
+
+describe('OverlayErrorBoundary', () => {
+  beforeEach(() => { cleanup(); });
+
+  it('renders children normally when no error', () => {
+    const { container } = render(
+      React.createElement(OverlayErrorBoundary, { type: 'timer' },
+        React.createElement(WorkingComponent)
+      )
+    );
+    expect(screen.getByTestId('ok')).toBeTruthy();
+    expect(container.textContent).toContain('Works!');
+    cleanup();
+  });
+
+  it('catches errors and shows fallback UI', () => {
+    // Suppress console.error for this test
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { container } = render(
+      React.createElement(OverlayErrorBoundary, { type: 'timer' },
+        React.createElement(ThrowingComponent)
+      )
+    );
+
+    expect(container.textContent).toContain('crashed');
+    expect(container.textContent).toContain('timer');
+    expect(container.textContent).toContain('Test crash!');
+    spy.mockRestore();
+    cleanup();
+  });
+
+  it('shows retry button that resets error state', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { container } = render(
+      React.createElement(OverlayErrorBoundary, { type: 'scorebug' },
+        React.createElement(ThrowingComponent)
+      )
+    );
+
+    expect(container.textContent).toContain('crashed');
+
+    const retryButton = screen.getByText('Retry');
+    expect(retryButton).toBeTruthy();
+
+    spy.mockRestore();
+    cleanup();
+  });
+});
