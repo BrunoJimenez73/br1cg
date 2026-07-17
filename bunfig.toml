@@ -1,0 +1,8 @@
+# ──────────────────────────────────────────────
+# br1cg — Bun configuration
+# ──────────────────────────────────────────────
+
+[test]
+# Preload happy-dom for React component tests
+# This provides document, window, etc. so @testing-library/react works
+preload = ["./tests/bun-dom-setup.ts"]
