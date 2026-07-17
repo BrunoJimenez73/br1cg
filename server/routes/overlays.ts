@@ -4,6 +4,28 @@
 
 import { jsonResponse, errorResponse } from '../middleware';
 import { getOverlayStatus, sendOverlayCommand, toggleOverlay } from '../ws-handler';
+import { OVERLAY_TYPES } from '../../src/lib/types';
+
+const VALID_TYPES = new Set(OVERLAY_TYPES);
+
+function validateOverlayBody(body: Record<string, unknown>): string | null {
+  if (!body.type || typeof body.type !== 'string' || !VALID_TYPES.has(body.type as any)) {
+    return `Invalid type. Must be one of: ${OVERLAY_TYPES.join(', ')}`;
+  }
+  if (body.name !== undefined && (typeof body.name !== 'string' || body.name.trim().length === 0)) {
+    return 'Name must be a non-empty string';
+  }
+  if (body.data !== undefined && (typeof body.data !== 'object' || body.data === null || Array.isArray(body.data))) {
+    return 'Data must be an object';
+  }
+  if (body.elements !== undefined && !Array.isArray(body.elements)) {
+    return 'Elements must be an array';
+  }
+  if (body.tags !== undefined && !Array.isArray(body.tags)) {
+    return 'Tags must be an array';
+  }
+  return null;
+}
 
 export async function handleOverlayRoutes(
   req: Request,
@@ -38,6 +60,9 @@ export async function handleOverlayRoutes(
 
     try {
       const body = await req.json() as { name: string; type: string; data?: Record<string, unknown>; elements?: unknown[]; tags?: string[] };
+      const validationError = validateOverlayBody(body as Record<string, unknown>);
+      if (validationError) return errorResponse(validationError, 400);
+
       const now = new Date().toISOString();
       const overlay = {
         id: uuid(),
@@ -105,6 +130,16 @@ export async function handleOverlayRoutes(
     if (method === 'PUT' || method === 'PATCH') {
       try {
         const body = await req.json();
+        // Validate fields if present
+        if (body.type !== undefined && !VALID_TYPES.has(body.type)) {
+          return errorResponse(`Invalid type. Must be one of: ${OVERLAY_TYPES.join(', ')}`, 400);
+        }
+        if (body.name !== undefined && (typeof body.name !== 'string' || body.name.trim().length === 0)) {
+          return errorResponse('Name must be a non-empty string', 400);
+        }
+        if (body.data !== undefined && (typeof body.data !== 'object' || body.data === null || Array.isArray(body.data))) {
+          return errorResponse('Data must be an object', 400);
+        }
         const updated = updateOverlay(id, body);
         if (!updated) return errorResponse('Not found', 404);
         return jsonResponse(getOverlay(id));

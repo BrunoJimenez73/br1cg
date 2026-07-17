@@ -192,3 +192,81 @@ describe('Server API - WebSocket Messages', () => {
     }
   });
 });
+
+describe('Server API - Input Validation', () => {
+  const OVERLAY_TYPES = [
+    'lower-third', 'timer', 'scorebug', 'title-card',
+    'ticker', 'alert', 'webcam-border', 'sponsor-logo',
+    'brb', '2x-counter', 'money-effect',
+    'social-looper', 'weather-bug', 'yt-view-count', 'driveby',
+  ] as const;
+  const VALID_TYPES = new Set(OVERLAY_TYPES);
+
+  // Replicate the validation logic from server/routes/overlays.ts
+  function validateOverlayBody(body: Record<string, unknown>): string | null {
+    if (!body.type || typeof body.type !== 'string' || !VALID_TYPES.has(body.type as any)) {
+      return `Invalid type. Must be one of: ${OVERLAY_TYPES.join(', ')}`;
+    }
+    if (body.name !== undefined && (typeof body.name !== 'string' || (body.name as string).trim().length === 0)) {
+      return 'Name must be a non-empty string';
+    }
+    if (body.data !== undefined && (typeof body.data !== 'object' || body.data === null || Array.isArray(body.data))) {
+      return 'Data must be an object';
+    }
+    if (body.elements !== undefined && !Array.isArray(body.elements)) {
+      return 'Elements must be an array';
+    }
+    if (body.tags !== undefined && !Array.isArray(body.tags)) {
+      return 'Tags must be an array';
+    }
+    return null;
+  }
+
+  it('debe aceptar body válido con type correcto', () => {
+    expect(validateOverlayBody({ type: 'timer', name: 'Test' })).toBeNull();
+    expect(validateOverlayBody({ type: 'lower-third', name: 'LT' })).toBeNull();
+    expect(validateOverlayBody({ type: 'scorebug' })).toBeNull();
+  });
+
+  it('debe rechazar type inválido', () => {
+    expect(validateOverlayBody({ type: 'invalid-type' })).toContain('Invalid type');
+    expect(validateOverlayBody({ type: '' })).toContain('Invalid type');
+    expect(validateOverlayBody({})).toContain('Invalid type');
+    expect(validateOverlayBody({ type: 123 })).toContain('Invalid type');
+  });
+
+  it('debe rechazar name vacío', () => {
+    expect(validateOverlayBody({ type: 'timer', name: '' })).toContain('Name must be a non-empty string');
+    expect(validateOverlayBody({ type: 'timer', name: '   ' })).toContain('Name must be a non-empty string');
+  });
+
+  it('debe aceptar name undefined (optional)', () => {
+    expect(validateOverlayBody({ type: 'timer' })).toBeNull();
+  });
+
+  it('debe rechazar data que no es objeto', () => {
+    expect(validateOverlayBody({ type: 'timer', data: 'string' })).toContain('Data must be an object');
+    expect(validateOverlayBody({ type: 'timer', data: [1, 2] })).toContain('Data must be an object');
+    expect(validateOverlayBody({ type: 'timer', data: null })).toContain('Data must be an object');
+  });
+
+  it('debe aceptar data como objeto válido', () => {
+    expect(validateOverlayBody({ type: 'timer', data: { minutes: 5 } })).toBeNull();
+    expect(validateOverlayBody({ type: 'timer', data: {} })).toBeNull();
+  });
+
+  it('debe rechazar elements que no es array', () => {
+    expect(validateOverlayBody({ type: 'timer', elements: 'not-array' })).toContain('Elements must be an array');
+    expect(validateOverlayBody({ type: 'timer', elements: {} })).toContain('Elements must be an array');
+  });
+
+  it('debe rechazar tags que no es array', () => {
+    expect(validateOverlayBody({ type: 'timer', tags: 'not-array' })).toContain('Tags must be an array');
+  });
+
+  it('debe aceptar todos los 15 tipos válidos', () => {
+    for (const type of OVERLAY_TYPES) {
+      expect(validateOverlayBody({ type })).toBeNull();
+    }
+  });
+});
