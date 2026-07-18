@@ -5,10 +5,30 @@
 ## Feature en curso
 
 ```
-ID:     207 — [DOC] Documentación y pipeline final
-Title:  Actualizar AGENTS.md, archivos del harness, subir a GitHub
-Status: completada
+ID:     301 — [UX] Restructuración a 3 páginas
+Title:  Studio (/studio/:id) + Editor Figma-like + Library simplificada
+Status: en progreso
 ```
+
+## Objetivo final
+
+Reestructurar la app en 3 páginas claras (estilo overlays.uno):
+
+1. **`/` (Library)** — Grid de overlays + Import/Export + botones rápidos
+2. **`/studio/:id`** — Control + Preview en vivo (iframe del overlay + controles)
+3. **`/editor/:id`** — Editor visual tipo Figma (canvas drag/drop + propiedades)
+4. **`/overlay/:type`** — Browser Source para OBS (sin cambios)
+
+### Fases de implementación
+
+| Fase | Descripción | Estado |
+|------|-------------|--------|
+| 1 | `/studio/:id` — Preview iframe + controles en vivo | 🔄 En progreso |
+| 2 | Library simplificada con botones Studio/Editor | ⏳ Pendiente |
+| 3 | Editor Figma-like con canvas drag/drop | ⏳ Pendiente |
+| 4 | Limpiar rutas antiguas (/control, /editor legacy) | ⏳ Pendiente |
+
+---
 
 ## Inicio de sesión
 
@@ -97,6 +117,104 @@ Pendiente: No se puede probar WS cross-tab en esta sesión (browser tool single-
 - **Commit**: `255bdc9` — "fix: overlay editor changes now propagate to live overlay via WS"
 - **Skill**: `br1cg-fix-timer-ws` actualizada con sección 5 (editor-overlay propagation)
 
+## Post-sesión v3: Fix bun test (110/110)
+
+`bun test` (runner nativo) auto-descubría `overlays.test.tsx` que necesita DOM → 83 tests fallaban con `document is not defined`.
+
+**Fix:**
+- `bunfig.toml` — configura preload para bun test
+- `tests/bun-dom-setup.ts` — polyfill DOM via `happy-dom` (document, window, navigator, ResizeObserver, etc.)
+
+**Resultado:** `bun test` → 110/110 ✅ (antes: 27/110)
+**Commit:** `207f846`
+
+## Post-sesión v4: ErrorBoundary + API Validation + Test Suite Completo
+
+### ErrorBoundary (Feature 204)
+- ✅ `src/components/overlays/ErrorBoundary.tsx` — Clase React que captura errores de render
+- ✅ Integrado en `OverlayRenderer.tsx` — envuelve cada overlay
+- ✅ 3 tests: render normal, catch error + fallback UI, retry button
+- **Commit:** `3656425`
+
+### API Validation (Feature 203)
+- ✅ `server/routes/overlays.ts` — Validación en POST y PUT:
+  - `type` debe ser uno de los 15 tipos válidos
+  - `name` debe ser string no vacío (si se provee)
+  - `data` debe ser objeto (si se provee)
+  - `elements` y `tags` deben ser arrays (si se proveen)
+- ✅ 9 tests de validación en `tests/server/db.test.ts`
+- **Commit:** `b3a69b3`
+
+### Estado de features refactor
+- Feature 201 ✅ Limpieza dead code
+- Feature 202 ✅ Bugs (WS reconnect ya estaba implementado)
+- Feature 203 ✅ Arquitectura (routes + validación)
+- Feature 204 ⚠️ Calidad (ErrorBoundary ✅, presets pendientes, JSDoc pendiente)
+- Feature 205 ⚠️ Tests (122 bun + 103 vitest = 225 tests, todos pasan)
+- Feature 206 ❌ Export/Import + Backup
+- Feature 207 ❌ Docs updates
+
+### Test suite final
+| Runner | Tests | Estado |
+|--------|-------|--------|
+| vitest | 103 | ✅ todos pasan |
+| bun test | 127 | ✅ todos pasan |
+| **Total** | **230** | **✅** |
+
+## Post-sesión v5: Export/Import (Feature 206)
+
+### Server
+- ✅ `GET /api/overlays/export` — Exporta todos los overlays como JSON con metadata (version, exportedAt, count)
+- ✅ `POST /api/overlays/import` — Importa array de overlays, salta existentes, valida tipos, retorna imported/skipped/errors
+
+### Client
+- ✅ `api-client.ts` — `exportOverlays()` + `importOverlays()`
+- ✅ `OverlayLibrary.tsx` — Botones Export (descarga JSON) e Import (file picker)
+
+### Tests
+- ✅ 5 tests de export/import en `tests/server/db.test.ts`
+- **Commit:** `6defd4f`
+
+## Post-sesión v6: Presets completos (Feature 204)
+
+### Presets
+- ✅ 34 presets cubriendo los 15 tipos de overlay:
+  - lower-third: 5, timer: 3, ticker: 5, scorebug: 3
+  - alert: 2, webcam-border: 2, sponsor-logo: 2, title-card: 2
+  - brb: 2, 2x-counter: 2, money-effect: 1, social-looper: 1
+  - weather-bug: 1, yt-view-count: 1, driveby: 1
+- ✅ `TemplatePreset` interface generalizada (category: string en vez de union type)
+- **Commit:** `a997993`
+
+## Post-sesión v7: Docs updates (Feature 207)
+
+- ✅ `docs/architecture.md` — Estado del proyecto actualizado, validación y error boundaries documentados
+- ✅ `CHECKPOINTS.md` — Todos los checkpoints actualizados, solo falta JSDoc y backup automático
+- ✅ `feature_list.json` — Features 204 y 207 marcadas como done
+- **Commit:** `32251de`
+
+### Estado FINAL de features refactor
+- Feature 201 ✅ Limpieza dead code
+- Feature 202 ✅ Bugs (WS reconnect ya estaba implementado)
+- Feature 203 ✅ Arquitectura (routes + validación)
+- Feature 204 ✅ Calidad (ErrorBoundary + 34 presets)
+- Feature 205 ✅ Tests (127 bun + 103 vitest = 230 tests)
+- Feature 206 ✅ Export/Import
+- Feature 207 ✅ Docs updates
+
+### Lo que queda (opcional)
+- JSDoc en funciones públicas de server y lib
+- Backup automático de SQLite antes de init
+
+### Test suite final
+| Runner | Tests | Estado |
+|--------|-------|--------|
+| vitest | 103 | ✅ todos pasan |
+| bun test | 127 | ✅ todos pasan |
+| **Total** | **230** | **✅** |
+
+---
+
 ## Estado final
 
 | Componente | Funciona |
@@ -106,6 +224,6 @@ Pendiente: No se puede probar WS cross-tab en esta sesión (browser tool single-
 | Editor → Overlay | ✅ Cambios en vivo via WS re-fetch |
 | Dashboard → Timer | ✅ Start/Pause/Reset via WS |
 | Timer overlay | ✅ Amarillo, 5min, top-left, controlable |
-| Tests | ✅ 110/110 (100 vitest + 10 bun) |
+| Tests | ✅ 230 tests (103 vitest + 127 bun) — todos pasan |
 | Build | ✅ 18 páginas, 0 errores |
-| GitHub | ✅ 3 commits en master, subido |
+| GitHub | ✅ 13 commits en master, subido |

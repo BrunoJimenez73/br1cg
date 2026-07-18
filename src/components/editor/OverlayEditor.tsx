@@ -11,8 +11,10 @@ import TemplatePicker from './TemplatePicker';
 type Tab = 'config' | 'design';
 
 export default function OverlayEditor() {
+  // Support both /editor?id=xxx (legacy) and /editor/xxx (new)
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-  const id = params.get('id') || 'new';
+  const pathParts = window.location.pathname.split('/');
+  const id = params.get('id') || pathParts[pathParts.length - 1] || 'new';
   const isNew = id === 'new';
 
   const [tab, setTab] = useState<Tab>('design');

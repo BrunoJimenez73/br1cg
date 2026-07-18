@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StudioPage from '../../components/studio/StudioPage';
+
+export function getStaticPaths() {
+  return [];
+}
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="br1cg — Studio">
+  <StudioPage client:only="react" overlayId={id || ''} />
+</BaseLayout>

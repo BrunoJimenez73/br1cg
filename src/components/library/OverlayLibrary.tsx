@@ -184,17 +184,16 @@ export default function OverlayLibrary() {
               </p>
               <div className="flex gap-2">
                 <a
-                  href={`/editor?id=${overlay.id}`}
-                  className="flex-1 text-center text-sm px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded transition-colors"
+                  href={`/studio/${overlay.id}`}
+                  className="flex-1 text-center text-sm px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded transition-colors font-medium"
                 >
-                  Edit
+                  ▶ Studio
                 </a>
                 <a
-                  href={`/overlay/${overlay.type}?id=${overlay.id}`}
-                  target="_blank"
-                  className="flex-1 text-center text-sm px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded transition-colors"
+                  href={`/editor/${overlay.id}`}
+                  className="flex-1 text-center text-sm px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded transition-colors"
                 >
-                  Open
+                  ✏️ Editor
                 </a>
               </div>
             </div>
