@@ -103,6 +103,4 @@
 
 ### Pendiente aún
 
-| Fase | Tarea |
-|------|-------|
-| 204 | JSDoc en funciones públicas |
+> ¡Nada! Todas las features del refactor están completadas. 🎉
