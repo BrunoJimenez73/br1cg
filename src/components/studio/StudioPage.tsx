@@ -168,7 +168,7 @@ export default function StudioPage({ overlayId: propId }: StudioPageProps) {
           <span className="text-xs text-gray-500">{connected ? 'Connected' : 'Disconnected'}</span>
         </div>
         <a
-          href={`/editor/${overlayId}`}
+          href={`/editor?id=${overlayId}`}
           className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 rounded transition-colors"
         >
           Open Editor

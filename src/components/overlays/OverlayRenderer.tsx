@@ -15,21 +15,22 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
   const wsRef = useRef<WebSocket | null>(null);
   const fetchKeyRef = useRef(0);
 
+  const [elements, setElements] = useState<Array<Record<string, unknown>>>([]);
+
   function fetchConfig(id: string) {
     const baseUrl = window.location.port === '4321' ? 'http://localhost:3001' : '';
     const key = ++fetchKeyRef.current;
     fetch(`${baseUrl}/api/overlays/${id}`)
       .then(res => res.json())
       .then(data => {
-        // Only apply if this is still the latest request
         if (key !== fetchKeyRef.current) return;
         if (data && data.data) {
           setConfig(data.data);
-          // Extract position from first element if available
           if (data.elements && data.elements.length > 0) {
             const el = data.elements[0];
             setPosition({ x: el.x || 0, y: el.y || 0 });
           }
+          setElements(data.elements || []);
         }
         setLoading(false);
       })
@@ -100,6 +101,64 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
       <OverlayErrorBoundary type={type}>
         <Component overlayId={overlayId} config={config} />
       </OverlayErrorBoundary>
+      {/* Render editor elements on top */}
+      {elements.filter((el: Record<string, unknown>) => el.visible !== false).map((el: Record<string, unknown>) => (
+        <EditorElement key={String(el.id)} element={el} />
+      ))}
     </div>
   );
+}
+
+/** Renders a single editor element (text, image, shape) */
+function EditorElement({ element }: { element: Record<string, unknown> }) {
+  const props = (element.props || {}) as Record<string, unknown>;
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: element.x || 0,
+    top: element.y || 0,
+    width: element.width || 100,
+    height: element.height || 40,
+    opacity: (element.opacity as number) ?? 1,
+    zIndex: (element.zIndex as number) ?? 0,
+  };
+
+  if (element.type === 'text') {
+    return (
+      <div style={{
+        ...style,
+        fontFamily: (props.fontFamily as string) || 'Inter, sans-serif',
+        fontSize: ((props.fontSize as number) || 16) + 'px',
+        fontWeight: (props.fontWeight as number) || 400,
+        color: (props.color as string) || '#fff',
+        textAlign: (props.textAlign as string) || 'left',
+        lineHeight: (props.lineHeight as number) || 1.4,
+        backgroundColor: (props.backgroundColor as string) || 'transparent',
+        padding: ((props.padding as number) || 0) + 'px',
+        textShadow: (props.textShadow as string) || undefined,
+        display: 'flex',
+        alignItems: 'center',
+      }}>
+        {(props.text as string) || ''}
+      </div>
+    );
+  }
+
+  if (element.type === 'image' && props.src) {
+    return (
+      <img src={String(props.src)} alt="" style={{ ...style, objectFit: 'contain' }} />
+    );
+  }
+
+  if (element.type === 'shape') {
+    return (
+      <div style={{
+        ...style,
+        backgroundColor: (props.backgroundColor as string) || '#fff',
+        borderRadius: ((props.borderRadius as number) || 0) + 'px',
+        border: props.borderColor ? `2px solid ${props.borderColor}` : undefined,
+      }} />
+    );
+  }
+
+  return null;
 }

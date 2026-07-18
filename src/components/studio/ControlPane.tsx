@@ -38,7 +38,7 @@ export default function ControlPane({ overlay, onShow, onHide, onConfigChange, a
 
       {/* Type-specific controls */}
       {overlay.type === 'timer' && (
-        <TimerControls config={config} onConfigChange={onConfigChange} addLog={addLog} />
+        <TimerControls config={config} onConfigChange={onConfigChange} addLog={addLog} overlayId={overlay.id} />
       )}
 
       {overlay.type === 'lower-third' && (
@@ -129,13 +129,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 // ─── Timer Controls ───
 
-function TimerControls({ config, onConfigChange, addLog }: {
+function TimerControls({ config, onConfigChange, addLog, overlayId }: {
   config: Record<string, unknown>;
   onConfigChange: (field: string, value: unknown) => void;
   addLog: (msg: string) => void;
+  overlayId: string;
 }) {
   function sendTimerCommand(action: string) {
-    const overlayId = window.location.pathname.split('/').pop();
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.port === '4321' ? 'localhost:3001' : window.location.host;
     const ws = new WebSocket(`${protocol}//${host}/ws`);
