@@ -154,9 +154,9 @@
   {
     "id": 204,
     "title": "[REF] Calidad: Error boundaries + presets + JSDoc",
-    "description": "ErrorBoundary para overlays, fix Ticker estado redundante, agregar presets para 11 tipos faltantes, JSDoc en funciones clave de server y lib",
+    "description": "ErrorBoundary para overlays, fix Ticker estado redundante, agregar presets para 15 tipos, JSDoc en funciones clave de server y lib",
     "track": "refactor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [202]
   },
   {
@@ -172,7 +172,7 @@
     "title": "[REF] Features: Export/Import + Backup automático",
     "description": "GET /api/overlays/export (JSON), POST /api/overlays/import, botones en Library, backup de SQLite antes de migraciones",
     "track": "refactor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [203]
   },
   {
@@ -180,7 +180,7 @@
     "title": "[REF] Documentación: actualizar docs + checkpoints + history",
     "description": "Actualizar AGENTS.md, docs/architecture.md, docs/conventions.md, CHECKPOINTS.md, progress/history.md con todo el refactor",
     "track": "refactor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [206]
   }
 ]

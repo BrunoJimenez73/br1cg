@@ -57,7 +57,7 @@
 ## Checkpoints de empaquetado (Fase 5+)
 
 - [x] **Stream Deck**: Una acción HTTP puede show/hide un overlay
-- [ ] **Export/Import**: Configuraciones se exportan a JSON y se importan de vuelta
+- [x] **Export/Import**: Configuraciones se exportan a JSON y se importan de vuelta
 - [ ] **Backup automático**: SQLite se respalda antes de cada migración
 
 | Checkpoints de refactor (Features 201-207) |
@@ -86,11 +86,18 @@
 - [x] **Tests de componentes**: 83 tests de overlays con vitest
 - [x] **Tests de API**: 10 tests de DB y WS con bun:test
 - [x] **Tests de tipos**: 17 tests de tipos y defaults
-- [x] **Tests pasan**: 110/110 tests pasan
+- [x] **Tests pasan**: 230/230 tests pasan (103 vitest + 127 bun)
+
+### Calidad (204)
+
+- [x] **Error boundaries**: OverlayErrorBoundary captura crashes de overlays
+- [x] **Presets completos**: 34 presets cubriendo los 15 tipos de overlay
+- [ ] **JSDoc en funciones públicas**
 
 ### Documentación (207)
 
 - [x] **AGENTS.md actualizado**: Mapa completo, comandos, URLs, estructura server
+- [x] **docs/architecture.md**: Estado del proyecto actualizado, validación y error boundaries documentados
 - [x] **progress/current.md**: Documentado
 - [x] **feature_list.json**: Features core y refactor completadas
 
@@ -98,11 +105,5 @@
 
 | Fase | Tarea |
 |------|-------|
-| 204 | Error boundaries |
-| 204 | Presets completos (15/15) |
 | 204 | JSDoc en funciones públicas |
-| 206 | Export/Import |
-| 206 | Backup automático |
-| 207 | docs/architecture.md: incluir server modular y WS reconnect |
-| 207 | docs/conventions.md actualizar (parcialmente ok) |
-| 207 | progress/history.md actualizar |
+| 206 | Backup automático de SQLite |

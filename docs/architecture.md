@@ -77,7 +77,7 @@ Cada overlay se conecta con ?subscribe=timer-1 en la URL.
 El servidor mantiene Map<roomId, Set<WebSocket>>.
 ```
 
-## Estado del refactor (Features 201-207)
+## Estado del proyecto (Features 201-207)
 
 Plan detallado: `thoughts/shared/plans/PL-02-refactor-quality.md`
 
@@ -86,7 +86,20 @@ Plan detallado: `thoughts/shared/plans/PL-02-refactor-quality.md`
 | 201 | Limpieza de dead code (legacy components, exports muertos) | ✅ Completado |
 | 202 | Bugs críticos (command:update, WS reconnect, ControlDashboard) | ✅ Completado |
 | 203 | API routes modulares (`server/routes/`), validación de entrada | ✅ Completado |
-| 204 | Error boundaries, presets completos, JSDoc | ⏳ Pendiente |
-| 205 | Tests (componentes, API, tipos) | ✅ Completado (110 tests) |
-| 206 | Export/Import + Backup automático | ⏳ Pendiente |
-| 207 | Documentación actualizada | ✅ Parcial (AGENTS.md + progress) |
+| 204 | Error boundaries, presets completos (34 presets, 15 tipos) | ✅ Completado |
+| 205 | Tests (componentes, API, tipos) | ✅ Completado (230 tests) |
+| 206 | Export/Import (`GET /export`, `POST /import`, UI buttons) | ✅ Completado |
+| 207 | Documentación actualizada | ✅ Completado |
+
+## Seguridad y validación
+
+### API Validation
+- `POST /api/overlays` valida: type (debe ser uno de 15 válidos), name (string no vacío), data (objeto), elements/tags (arrays)
+- `PUT /api/overlays/:id` valida los mismos campos si se proveen
+- `POST /api/overlays/import` valida cada overlay del array, salta existentes por ID
+- `POST /api/overlays/:id/command` valida action (show/hide/update)
+
+### Error Boundary
+- `OverlayErrorBoundary` envuelve cada overlay en `OverlayRenderer`
+- Captura errores de render y muestra fallback UI con botón de retry
+- Previene que un overlay roto destruya toda la página
