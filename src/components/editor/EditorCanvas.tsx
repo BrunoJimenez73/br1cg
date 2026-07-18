@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import type { OverlayElement } from '../../lib/types';
+import SharedElementRenderer from '../overlays/SharedElementRenderer';
 
 interface EditorCanvasProps {
   elements: OverlayElement[];
@@ -16,7 +17,6 @@ const CANVAS_H = 1080;
 const SCALE = 0.5;
 
 export default function EditorCanvas({ elements, selectedId, onSelect, onUpdate, onAdd, onDelete }: EditorCanvasProps) {
-  const [dragType, setDragType] = useState<OverlayElement['type'] | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = useCallback((e: React.KeyboardEvent) => {
@@ -87,7 +87,7 @@ export default function EditorCanvas({ elements, selectedId, onSelect, onUpdate,
                     cursor: el.locked ? 'default' : 'move',
                   }}
                 >
-                  <ElementRenderer element={el} />
+                  <SharedElementRenderer element={el} fillParent />
                 </Rnd>
               ))}
           </div>
@@ -106,106 +106,7 @@ function Toolbar({ onAdd }: { onAdd: (type: OverlayElement['type']) => void }) {
       <button onClick={() => onAdd('shape')} className="px-2 py-1 text-xs bg-gray-800 hover:bg-indigo-700 rounded transition-colors">Shape</button>
       <button onClick={() => onAdd('timer-display')} className="px-2 py-1 text-xs bg-gray-800 hover:bg-indigo-700 rounded transition-colors">Timer</button>
       <div className="flex-1" />
-      <span className="text-xs text-gray-600">1920 × 1080</span>
+      <span className="text-xs text-gray-600">1920 x 1080</span>
     </div>
   );
-}
-
-function ElementRenderer({ element }: { element: OverlayElement }) {
-  const p = element.props;
-
-  switch (element.type) {
-    case 'text':
-      return (
-        <div
-          style={{
-            width: '100%', height: '100%',
-            fontFamily: (p.fontFamily as string) || 'Inter, sans-serif',
-            fontSize: ((p.fontSize as number) || 16) + 'px',
-            fontWeight: (p.fontWeight as number) || 400,
-            color: (p.color as string) || '#fff',
-            textAlign: (p.textAlign as string) || 'left',
-            letterSpacing: ((p.letterSpacing as number) || 0) + 'px',
-            lineHeight: ((p.lineHeight as number) || 1.4),
-            backgroundColor: (p.backgroundColor as string) || 'transparent',
-            padding: ((p.padding as number) || 0) + 'px',
-            overflow: 'hidden',
-            textShadow: (p.textShadow as string) || undefined,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          {(p.text as string) || 'Text'}
-        </div>
-      );
-
-    case 'image':
-      return (
-        <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-          {p.src ? (
-            <img
-              src={p.src as string}
-              alt={(p.alt as string) || ''}
-              style={{
-                width: '100%', height: '100%',
-                objectFit: (p.fit as string) || 'contain',
-                borderRadius: ((p.borderRadius as number) || 0) + 'px',
-              }}
-            />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gray-800 text-gray-500 text-xs">
-              Image
-            </div>
-          )}
-        </div>
-      );
-
-    case 'shape':
-      return (
-        <div
-          style={{
-            width: '100%', height: '100%',
-            backgroundColor: (p.backgroundColor as string) || '#333',
-            border: ((p.borderWidth as number) || 0) > 0 ? `${p.borderWidth}px solid ${(p.borderColor as string) || '#fff'}` : undefined,
-            borderRadius: (p.shapeType as string) === 'circle' ? '50%' : ((p.borderRadius as number) || 0) + 'px',
-          }}
-        />
-      );
-
-    case 'timer-display':
-      return (
-        <div
-          style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: (p.fontFamily as string) || 'monospace',
-            fontSize: ((p.fontSize as number) || 72) + 'px',
-            color: (p.color as string) || '#22c55e',
-            fontWeight: 900,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {(p.format as string) === 'mm:ss' ? '05:00' : '00:05:00'}
-        </div>
-      );
-
-    case 'score-display':
-      return (
-        <div
-          style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: (p.fontFamily as string) || 'Inter, sans-serif',
-            fontSize: ((p.fontSize as number) || 36) + 'px',
-            color: (p.color as string) || '#fff',
-            fontWeight: 900,
-          }}
-        >
-          0
-        </div>
-      );
-
-    default:
-      return null;
-  }
 }
