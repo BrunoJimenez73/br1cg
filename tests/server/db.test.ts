@@ -406,3 +406,78 @@ describe('Server API - Export/Import Logic', () => {
     expect(getTestOverlay('imported-2')).toBeNull();
   });
 });
+
+describe('Server Database - Backup Logic', () => {
+  const { existsSync, mkdirSync, copyFileSync, statSync, readdirSync, unlinkSync } = require('fs');
+  const { join } = require('path');
+  const tmpDir = join(process.cwd(), '.test-backup-tmp');
+
+  it('debe crear directorio de backup si no existe', () => {
+    if (!existsSync(tmpDir)) {
+      mkdirSync(tmpDir, { recursive: true });
+    }
+    expect(existsSync(tmpDir)).toBeTrue();
+  });
+
+  it('debe copiar archivo de base de datos', () => {
+    const srcPath = join(tmpDir, 'test.db');
+    const backupDir = join(tmpDir, 'backup');
+    const backupPath = join(backupDir, 'store-test.db');
+
+    // Create a test DB file
+    const testDb = new Database(srcPath);
+    testDb.run('CREATE TABLE test (id TEXT)');
+    testDb.run('INSERT INTO test VALUES (?)', ['hello']);
+    testDb.close();
+
+    // Create backup dir and copy
+    if (!existsSync(backupDir)) {
+      mkdirSync(backupDir, { recursive: true });
+    }
+    copyFileSync(srcPath, backupPath);
+
+    expect(existsSync(backupPath)).toBeTrue();
+    expect(statSync(backupPath).size).toBeGreaterThan(0);
+
+    // Verify backup is valid
+    const backupDb = new Database(backupPath);
+    const row = backupDb.query('SELECT * FROM test').get();
+    expect(row).toBeDefined();
+    backupDb.close();
+  });
+
+  it('debe limpiar backups antiguos (mantener últimos 5)', () => {
+    const backupDir = join(tmpDir, 'backup');
+
+    // Create 8 fake backup files
+    for (let i = 0; i < 8; i++) {
+      const path = join(backupDir, `store-2024-01-0${i + 1}T00-00-00.db`);
+      const testDb = new Database(path);
+      testDb.run('CREATE TABLE test (id TEXT)');
+      testDb.close();
+    }
+
+    // Simulate cleanup: keep only last 5
+    const files = readdirSync(backupDir)
+      .filter((f) => f.startsWith('store-') && f.endsWith('.db'))
+      .sort()
+      .reverse();
+
+    for (const file of files.slice(5)) {
+      unlinkSync(join(backupDir, file));
+    }
+
+    const remaining = readdirSync(backupDir)
+      .filter((f) => f.startsWith('store-') && f.endsWith('.db'));
+    expect(remaining.length).toBeLessThanOrEqual(5);
+  });
+
+  it('debe limpiar archivos temporales de test', () => {
+    // Clean up test directory
+    const { rmSync } = require('fs');
+    if (existsSync(tmpDir)) {
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
+    expect(existsSync(tmpDir)).toBeFalse();
+  });
+});

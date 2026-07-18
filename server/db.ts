@@ -1,4 +1,6 @@
 import { Database } from 'bun:sqlite';
+import { existsSync, mkdirSync, copyFileSync, statSync, readdirSync, unlinkSync } from 'fs';
+import { join } from 'path';
 import type { OverlayConfig } from '../src/lib/types';
 
 interface OverlayRow {
@@ -15,10 +17,41 @@ interface OverlayRow {
 
 let db: Database | null = null;
 
+function backupDatabase(dbPath: string): void {
+  if (!existsSync(dbPath)) return; // No backup on first run
+
+  const backupDir = join(dbPath, '..', 'backup');
+  if (!existsSync(backupDir)) {
+    mkdirSync(backupDir, { recursive: true });
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const backupPath = join(backupDir, `store-${timestamp}.db`);
+
+  // Only backup if file has content
+  const stat = statSync(dbPath);
+  if (stat.size > 0) {
+    copyFileSync(dbPath, backupPath);
+  }
+
+  // Keep only last 5 backups
+  const files = readdirSync(backupDir)
+    .filter((f: string) => f.startsWith('store-') && f.endsWith('.db'))
+    .sort()
+    .reverse();
+  for (const file of files.slice(5)) {
+    unlinkSync(join(backupDir, file));
+  }
+}
+
 export function getDb(): Database {
   if (!db) {
-    const dir = new URL('../data/', import.meta.url);
-    db = new Database(new URL('store.db', dir).pathname, { create: true });
+    const dataDir = new URL('../data/', import.meta.url).pathname;
+    const dbPath = join(dataDir, 'store.db');
+
+    backupDatabase(dbPath);
+
+    db = new Database(dbPath, { create: true });
     initSchema(db);
   }
   return db;
