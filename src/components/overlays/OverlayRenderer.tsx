@@ -73,7 +73,7 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
       position: 'relative', backgroundColor: 'transparent',
     }}>
       {elements
-        .filter(el => el.visible !== false)
+        .filter(el => el.visible)
         .sort((a, b) => ((a.zIndex as number) || 0) - ((b.zIndex as number) || 0))
         .map(el => (
           <div
@@ -88,7 +88,7 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
               zIndex: (el.zIndex as number) ?? 0,
             }}
           >
-            <SharedElementRenderer element={el} />
+            <SharedElementRenderer element={el} fillParent />
           </div>
         ))
       }
