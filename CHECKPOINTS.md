@@ -58,7 +58,7 @@
 
 - [x] **Stream Deck**: Una acción HTTP puede show/hide un overlay
 - [x] **Export/Import**: Configuraciones se exportan a JSON y se importan de vuelta
-- [ ] **Backup automático**: SQLite se respalda antes de cada migración
+- [x] **Backup automático**: SQLite se respalda antes de cada init (últimos 5 backups)
 
 | Checkpoints de refactor (Features 201-207) |
 
@@ -106,4 +106,3 @@
 | Fase | Tarea |
 |------|-------|
 | 204 | JSDoc en funciones públicas |
-| 206 | Backup automático de SQLite |
