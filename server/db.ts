@@ -57,7 +57,10 @@ function backupDatabase(dbPath: string): void {
  */
 export function getDb(): Database {
   if (!db) {
-    const dataDir = new URL('../data/', import.meta.url).pathname;
+    const dataDir = join(import.meta.dir, '..', 'data');
+    if (!existsSync(dataDir)) {
+      mkdirSync(dataDir, { recursive: true });
+    }
     const dbPath = join(dataDir, 'store.db');
 
     backupDatabase(dbPath);
