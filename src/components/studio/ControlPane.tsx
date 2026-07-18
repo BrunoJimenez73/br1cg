@@ -89,7 +89,7 @@ export default function ControlPane({ overlay, onShow, onHide, onConfigChange, a
       <Section title="Links">
         <div className="space-y-2">
           <a
-            href={`/editor/${overlay.id}`}
+            href={`/editor?id=${overlay.id}`}
             className="block w-full text-center px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm transition-colors"
           >
             ✏️ Open in Editor

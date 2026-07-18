@@ -9,25 +9,6 @@ import { handleOverlayRoutes, handleTemplateRoutes } from './routes/overlays';
 
 const PORT = parseInt(process.env.PORT || '3001');
 
-/** Generate HTML shell for dynamic React pages (studio/editor) */
-function reactAppShell(title: string): Response {
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title}</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-</head>
-<body style="margin:0;background:#030712;color:#fff;">
-  <div id="app"></div>
-</body>
-</html>`;
-  return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8', ...corsHeaders },
-  });
-}
-
 const server = serve({
   port: PORT,
 
@@ -89,13 +70,21 @@ const server = serve({
       if (staticResponse) return staticResponse;
     }
 
-    // 6. Dynamic React pages: /studio/:id and /editor/:id
-    // These are served as React app shells; the client reads the ID from the URL
-    if (url.pathname.startsWith('/studio/')) {
-      return reactAppShell('br1cg — Studio');
+    // 6. Dynamic routes: /studio/:id and /editor/:id
+    // Redirect to query param format so Astro can serve the static page
+    if (url.pathname.startsWith('/studio/') && url.pathname !== '/studio/') {
+      const id = url.pathname.split('/')[2];
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/studio?id=${id}`, ...corsHeaders },
+      });
     }
-    if (url.pathname.startsWith('/editor/')) {
-      return reactAppShell('br1cg — Editor');
+    if (url.pathname.startsWith('/editor/') && url.pathname !== '/editor/') {
+      const id = url.pathname.split('/')[2];
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/editor?id=${id}`, ...corsHeaders },
+      });
     }
 
     // 7. Fallback: index.html for client-side routing

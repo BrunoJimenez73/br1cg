@@ -16,11 +16,17 @@ interface StudioPageProps {
 }
 
 export default function StudioPage({ overlayId: propId }: StudioPageProps) {
-  // In dev mode, overlayId comes from Astro props; in prod, read from URL
+  // Read overlayId from props, query params, or URL path
   const [overlayId] = useState(() => {
     if (propId) return propId;
+    if (typeof window === 'undefined') return '';
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('id');
+    if (fromQuery) return fromQuery;
+    // Fallback: extract from path like /studio/xxx
     const parts = window.location.pathname.split('/');
-    return parts[parts.length - 1] || '';
+    const last = parts[parts.length - 1];
+    return last && last !== 'studio' ? last : '';
   });
   const [overlay, setOverlay] = useState<OverlayConfig | null>(null);
   const [loading, setLoading] = useState(true);
