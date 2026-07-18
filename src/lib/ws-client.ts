@@ -4,17 +4,45 @@ import type { WSServerMessage } from './types';
 const MAX_BACKOFF = 30_000;
 const HEARTBEAT_INTERVAL = 30_000;
 
+/**
+ * Returns the WebSocket host, handling dev vs production contexts.
+ * @returns The hostname:port string for WS connections
+ */
 function getWSHost(): string {
   if (typeof window === 'undefined') return 'localhost:3001';
   const port = window.location.port;
   return port === '4321' ? 'localhost:3001' : window.location.host;
 }
 
+/**
+ * Returns the full WebSocket base URL (protocol + host).
+ * Uses wss:// for HTTPS, ws:// for HTTP.
+ * @returns Complete WebSocket URL base (e.g., 'ws://localhost:3001')
+ */
 export function getWSBase(): string {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${protocol}//${getWSHost()}`;
 }
 
+/**
+ * React hook for managing a WebSocket connection with auto-reconnect.
+ * Features: exponential backoff (1s→30s), heartbeat pings every 30s,
+ * automatic reconnection on disconnect, cleanup on unmount.
+ *
+ * @param overlayId - Optional overlay ID to subscribe to a specific room
+ * @param onMessage - Callback invoked for each parsed server message
+ * @example
+ * ```tsx
+ * useWebSocket({
+ *   overlayId: 'timer-1',
+ *   onMessage: (msg) => {
+ *     if (msg.type === 'command' && msg.action === 'show') {
+ *       setVisible(true);
+ *     }
+ *   }
+ * });
+ * ```
+ */
 export function useWebSocket({ overlayId, onMessage }: { overlayId?: string; onMessage: (msg: WSServerMessage) => void }) {
   const wsRef = useRef<WebSocket | null>(null);
   const cbRef = useRef(onMessage);

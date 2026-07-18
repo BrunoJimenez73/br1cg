@@ -17,6 +17,12 @@ interface OverlayRow {
 
 let db: Database | null = null;
 
+/**
+ * Creates an automatic backup of the SQLite database before initialization.
+ * Copies store.db to data/backup/store-{timestamp}.db.
+ * Keeps only the last 5 backups to prevent disk bloat.
+ * @param dbPath - Absolute path to the database file
+ */
 function backupDatabase(dbPath: string): void {
   if (!existsSync(dbPath)) return; // No backup on first run
 
@@ -44,6 +50,11 @@ function backupDatabase(dbPath: string): void {
   }
 }
 
+/**
+ * Returns the singleton Database instance, creating it on first access.
+ * Creates data/ directory if needed, runs backup, and initializes schema.
+ * @returns The SQLite database instance
+ */
 export function getDb(): Database {
   if (!db) {
     const dataDir = new URL('../data/', import.meta.url).pathname;
@@ -57,6 +68,11 @@ export function getDb(): Database {
   return db;
 }
 
+/**
+ * Initializes the database schema with overlays and templates tables.
+ * Handles migrations (e.g., adding elements column) gracefully.
+ * @param database - The SQLite database to initialize
+ */
 function initSchema(database: Database): void {
   database.run(`
     CREATE TABLE IF NOT EXISTS overlays (
@@ -89,16 +105,30 @@ function initSchema(database: Database): void {
   `);
 }
 
+/**
+ * Fetches all overlays from the database, ordered by most recently updated.
+ * @returns Array of all overlay configurations
+ */
 export function getAllOverlays(): OverlayConfig[] {
   const rows = getDb().query('SELECT * FROM overlays ORDER BY updated_at DESC').all() as OverlayRow[];
   return rows.map(rowToOverlay);
 }
 
+/**
+ * Fetches a single overlay by its unique ID.
+ * @param id - The overlay UUID
+ * @returns The overlay configuration, or null if not found
+ */
 export function getOverlay(id: string): OverlayConfig | null {
   const row = getDb().query('SELECT * FROM overlays WHERE id = ?').get(id) as OverlayRow | null;
   return row ? rowToOverlay(row) : null;
 }
 
+/**
+ * Inserts a new overlay into the database.
+ * @param overlay - The complete overlay configuration to insert
+ * @throws SQLite error if the insert fails (e.g., duplicate ID)
+ */
 export function createOverlay(overlay: OverlayConfig): void {
   getDb().run(
     'INSERT INTO overlays (id, name, type, data, elements, tags, favorite, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -106,6 +136,13 @@ export function createOverlay(overlay: OverlayConfig): void {
   );
 }
 
+/**
+ * Updates an existing overlay by merging the provided fields.
+ * Automatically updates the `updatedAt` timestamp.
+ * @param id - The overlay UUID to update
+ * @param overlay - Partial overlay data to merge
+ * @returns true if the overlay was found and updated, false if not found
+ */
 export function updateOverlay(id: string, overlay: Partial<OverlayConfig>): boolean {
   const existing = getOverlay(id);
   if (!existing) return false;
@@ -118,11 +155,22 @@ export function updateOverlay(id: string, overlay: Partial<OverlayConfig>): bool
   return true;
 }
 
+/**
+ * Deletes an overlay from the database by ID.
+ * @param id - The overlay UUID to delete
+ * @returns true if the overlay was deleted, false if not found
+ */
 export function deleteOverlay(id: string): boolean {
   const result = getDb().run('DELETE FROM overlays WHERE id = ?', [id]);
   return result.changes > 0;
 }
 
+/**
+ * Converts a raw database row into a typed OverlayConfig object.
+ * Parses JSON fields (data, elements, tags) and normalizes timestamps.
+ * @param row - Raw database row
+ * @returns Typed overlay configuration
+ */
 function rowToOverlay(row: OverlayRow): OverlayConfig {
   return {
     id: row.id,

@@ -6,12 +6,25 @@ import type { OverlayConfig } from './types';
 
 const API_BASE = 'http://localhost:3001/api/overlays';
 
+/**
+ * Returns the base API URL, handling dev (Astro) vs production (Bun) contexts.
+ * In dev mode (port 4321), proxies to localhost:3001 to avoid CORS issues.
+ * @returns The base URL for overlay API endpoints
+ */
 function getBaseUrl(): string {
   if (typeof window === 'undefined') return API_BASE;
   const port = window.location.port;
   return port === '4321' ? 'http://localhost:3001/api/overlays' : '/api/overlays';
 }
 
+/**
+ * Generic HTTP request helper with error handling.
+ * Automatically sets Content-Type to JSON and throws on non-2xx responses.
+ * @param path - The API path to append to the base URL (e.g., '/timer-1')
+ * @param options - Standard fetch RequestInit options
+ * @returns Parsed JSON response
+ * @throws Error with status code and message on API errors
+ */
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -29,17 +42,28 @@ async function request<T>(
   return res.json() as Promise<T>;
 }
 
-/** Fetch all overlays */
+/**
+ * Fetches all overlays from the server.
+ * @returns Array of overlay configurations, ordered by most recently updated
+ */
 export async function getOverlays(): Promise<OverlayConfig[]> {
   return request<OverlayConfig[]>('');
 }
 
-/** Fetch a single overlay by ID */
+/**
+ * Fetches a single overlay by its unique ID.
+ * @param id - The overlay UUID
+ * @returns The overlay configuration
+ */
 export async function getOverlay(id: string): Promise<OverlayConfig> {
   return request<OverlayConfig>(`/${id}`);
 }
 
-/** Create a new overlay */
+/**
+ * Creates a new overlay on the server.
+ * @param data - Partial overlay data (type is required, others are optional)
+ * @returns The created overlay with generated ID and timestamps
+ */
 export async function createOverlay(
   data: Partial<OverlayConfig>,
 ): Promise<OverlayConfig> {
@@ -49,7 +73,12 @@ export async function createOverlay(
   });
 }
 
-/** Update an existing overlay */
+/**
+ * Updates an existing overlay by merging the provided fields.
+ * @param id - The overlay UUID to update
+ * @param data - Partial overlay data to merge
+ * @returns The updated overlay configuration
+ */
 export async function updateOverlay(
   id: string,
   data: Partial<OverlayConfig>,
@@ -60,12 +89,20 @@ export async function updateOverlay(
   });
 }
 
-/** Delete an overlay */
+/**
+ * Deletes an overlay from the server.
+ * @param id - The overlay UUID to delete
+ * @returns Success confirmation
+ */
 export async function deleteOverlay(id: string): Promise<{ success: boolean }> {
   return request<{ success: boolean }>(`/${id}`, { method: 'DELETE' });
 }
 
-/** Export all overlays as JSON */
+/**
+ * Exports all overlays as a JSON-compatible object.
+ * Includes metadata (version, timestamp, count) for import compatibility.
+ * @returns Export package with all overlays
+ */
 export async function exportOverlays(): Promise<{
   version: number;
   exportedAt: string;
@@ -75,7 +112,12 @@ export async function exportOverlays(): Promise<{
   return request('/export');
 }
 
-/** Import overlays from JSON array */
+/**
+ * Imports overlays from a JSON array.
+ * Skips overlays that already exist (by ID), validates types.
+ * @param overlays - Array of overlay configurations to import
+ * @returns Import results with counts and any validation errors
+ */
 export async function importOverlays(overlays: OverlayConfig[]): Promise<{
   success: boolean;
   imported: number;

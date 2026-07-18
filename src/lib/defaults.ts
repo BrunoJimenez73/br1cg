@@ -199,6 +199,10 @@ export const DEFAULT_DRIVE_BY: DriveByConfig = {
   repeatDelay: 3,
 };
 
+/**
+ * Default configuration for each overlay type.
+ * Maps every OverlayType to its corresponding config with sensible defaults.
+ */
 export const DEFAULTS: Record<OverlayType, OverlayConfigData> = {
   'lower-third': DEFAULT_LOWER_THIRD,
   'timer': DEFAULT_TIMER,
@@ -217,10 +221,27 @@ export const DEFAULTS: Record<OverlayType, OverlayConfigData> = {
   'driveby': DEFAULT_DRIVE_BY,
 };
 
+/**
+ * Returns the default configuration data for a given overlay type.
+ * @param type - The overlay type (e.g., 'timer', 'lower-third')
+ * @returns Default configuration object for that type
+ */
 export function getDefaultConfig(type: OverlayType): OverlayConfigData {
   return DEFAULTS[type];
 }
 
+/**
+ * Helper to create a default OverlayElement with sensible defaults.
+ * @param id - Element identifier
+ * @param type - Element type (text, shape, image, timer-display)
+ * @param x - X position in pixels
+ * @param y - Y position in pixels
+ * @param w - Width in pixels
+ * @param h - Height in pixels
+ * @param props - Type-specific properties (text content, colors, etc.)
+ * @param partial - Optional overrides for defaults (rotation, zIndex, etc.)
+ * @returns Complete OverlayElement object
+ */
 function el(
   id: string, type: OverlayElement['type'],
   x: number, y: number, w: number, h: number,
@@ -230,6 +251,10 @@ function el(
   return { id, type, x, y, width: w, height: h, rotation: 0, zIndex: 1, opacity: 1, visible: true, locked: false, props, ...partial };
 }
 
+/**
+ * Default visual elements (position, size, style) for each overlay type.
+ * Used by the visual editor as starting layout.
+ */
 export const DEFAULT_ELEMENTS: Record<OverlayType, OverlayElement[]> = {
   'lower-third': [
     el('bg-bar', 'shape', 40, 920, 700, 100, { shapeType: 'rounded-rect', backgroundColor: '#1a1a2e', borderRadius: 4 }),
@@ -279,6 +304,11 @@ export const DEFAULT_ELEMENTS: Record<OverlayType, OverlayElement[]> = {
   'driveby': [],
 };
 
+/**
+ * Returns the default visual elements for a given overlay type.
+ * @param type - The overlay type
+ * @returns Array of default elements, or empty array if none defined
+ */
 export function getDefaultElements(type: OverlayType): OverlayElement[] {
   return DEFAULT_ELEMENTS[type] ?? [];
 }
