@@ -82,7 +82,7 @@ const server = serve({
     // 5. Static files (overlay, control, _assets, home)
     const isStaticPath =
       url.pathname.startsWith('/overlay/') ||
-      url.pathname.startsWith('/control') ||
+      url.pathname === '/control' ||
       url.pathname.startsWith('/editor') ||
       url.pathname.startsWith('/studio') ||
       url.pathname.startsWith('/_assets/') ||
@@ -93,7 +93,22 @@ const server = serve({
       if (staticResponse) return staticResponse;
     }
 
-    // 6. Dynamic routes: /studio/:id and /editor/:id → redirect to query param
+    // 6. /control without id → redirect to library home
+    if (url.pathname === '/control' && !url.searchParams.has('id')) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: '/', ...corsHeaders },
+      });
+    }
+
+    // 8. Dynamic routes: /control/:id, /studio/:id and /editor/:id → redirect to query param
+    if (url.pathname.startsWith('/control/') && url.pathname !== '/control/') {
+      const id = url.pathname.split('/')[2];
+      return new Response(null, {
+        status: 302,
+        headers: { Location: `/control?id=${id}`, ...corsHeaders },
+      });
+    }
     if (url.pathname.startsWith('/studio/') && url.pathname !== '/studio/') {
       const id = url.pathname.split('/')[2];
       return new Response(null, {
@@ -109,11 +124,11 @@ const server = serve({
       });
     }
 
-    // 7. Fallback: index.html for client-side routing
+    // 9. Fallback: index.html for client-side routing
     const indexResponse = await fallbackIndex();
     if (indexResponse) return indexResponse;
 
-    // 8. 404
+    // 10. 404
     logRequest(req, url);
     return new Response('Not Found', { status: 404, headers: { ...corsHeaders, ...securityHeaders } });
   },

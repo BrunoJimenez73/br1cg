@@ -1,24 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ControlDashboard from '../../components/controls/ControlDashboard';
+import ControlRouter from '../../components/control/ControlRouter';
 ---
 
-<BaseLayout title="br1cg — Control Panel">
-  <main class="min-h-screen bg-gray-950 text-white">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-3xl font-bold">Control Panel</h1>
-          <p class="text-gray-400 mt-1">Controla tus overlays en tiempo real</p>
-        </div>
-        <a
-          href="/"
-          class="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors"
-        >
-          ← Library
-        </a>
-      </div>
-      <ControlDashboard client:load />
-    </div>
-  </main>
+<BaseLayout title="br1cg — Control">
+  <ControlRouter client:only="react" />
 </BaseLayout>

@@ -54,3 +54,9 @@
 - SocialLooperControls: accounts list add/remove + rotation interval
 - getControlsForType: 6 tipos (timer, lower-third, scorebug, ticker, social-looper, generic)
 - Tests: 103/103 pasan. Build: OK.
+
+## 2026-07-19 — Sesión 14: Timer bugfix (start/pause/reset no funcionaban)
+- **Causa**: `OverlayRenderer.tsx` renderizaba `SharedElementRenderer` con `timer-display` estático, ignorando WS `event` messages. `Timer.tsx` nativo nunca se usaba en producción.
+- **Fix 1** (`OverlayRenderer.tsx`): Importar `OVERLAY_COMPONENTS` y renderizar componente nativo (Timer, LowerThird, etc.) cuando existe, con `config` + `overlayId`. Fallback a elementos.
+- **Fix 2** (`ControllerPage.tsx`): `TimerControls` ahora usa WS persistente (`sendCommand`) en vez de crear conexión nueva por clic.
+- Verificación: Build ✅ 19 páginas 0 errores. Tests ✅ 188/188. init.ps1 ✅ OK.

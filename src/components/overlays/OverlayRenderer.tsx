@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useWebSocket, getAPIBase } from '../../lib/ws-client';
 import type { OverlayElement } from '../../lib/types';
 import SharedElementRenderer from './SharedElementRenderer';
+import { OVERLAY_COMPONENTS } from './index';
 
 interface OverlayRendererProps {
   type: string;
@@ -67,6 +68,14 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
 
   if (loading || !visible) return null;
 
+  // Use native overlay component (Timer, LowerThird, etc.) if available
+  // These handle their own WS events (start/pause/reset) and rendering
+  const OverlayComponent = OVERLAY_COMPONENTS[type as keyof typeof OVERLAY_COMPONENTS];
+  if (OverlayComponent) {
+    return <OverlayComponent config={config ?? undefined} overlayId={overlayId} />;
+  }
+
+  // Fallback: render from saved elements
   return (
     <div style={{
       width: 1920, height: 1080, overflow: 'hidden',

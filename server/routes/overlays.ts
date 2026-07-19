@@ -67,6 +67,7 @@ export async function handleOverlayRoutes(
         id: uuid(),
         name: body.name || 'Sin nombre',
         type: body.type,
+        description: body.description || '',
         data: body.data || getDefaultConfig(body.type as any),
         elements: body.elements || getDefaultElements(body.type as any),
         tags: body.tags || [],
@@ -156,6 +157,7 @@ export async function handleOverlayRoutes(
           id,
           name: (typeof item.name === 'string' && item.name.trim()) || 'Imported overlay',
           type: item.type as string,
+          description: (typeof item.description === 'string') ? item.description : '',
           data: (item.data && typeof item.data === 'object' && !Array.isArray(item.data))
             ? item.data as Record<string, unknown>
             : getDefaultConfig(item.type as any),

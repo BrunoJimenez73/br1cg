@@ -124,6 +124,13 @@ export default function ControlDashboard() {
                 </span>
                 <div className="flex items-center gap-2">
                   <a
+                    href={`/control?id=${overlay.id}`}
+                    className="text-xs text-gray-500 hover:text-indigo-400"
+                    title="Open controller"
+                  >
+                    🎮
+                  </a>
+                  <a
                     href={getOverlayUrl(overlay)}
                     target="_blank"
                     className="text-xs text-gray-500 hover:text-indigo-400"

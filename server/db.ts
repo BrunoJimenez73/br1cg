@@ -7,6 +7,7 @@ interface OverlayRow {
   id: string;
   name: string;
   type: string;
+  description: string;
   data: string;
   elements: string;
   tags: string;
@@ -114,6 +115,16 @@ function initSchema(database: Database): void {
     }
   }
 
+  // Migration: add description column if missing
+  try {
+    database.run(`ALTER TABLE overlays ADD COLUMN description TEXT DEFAULT ''`);
+  } catch (e) {
+    const msg = (e as Error).message || String(e);
+    if (!msg.includes('duplicate column')) {
+      console.error('[DB] Migration error:', msg);
+    }
+  }
+
   database.run(`
     CREATE TABLE IF NOT EXISTS templates (
       id TEXT PRIMARY KEY,
@@ -151,8 +162,8 @@ export function getOverlay(id: string): OverlayConfig | null {
  */
 export function createOverlay(overlay: OverlayConfig): void {
   getDb().run(
-    'INSERT INTO overlays (id, name, type, data, elements, tags, favorite, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [overlay.id, overlay.name, overlay.type, JSON.stringify(overlay.data), JSON.stringify(overlay.elements || []), JSON.stringify(overlay.tags), overlay.favorite ? 1 : 0, overlay.createdAt, overlay.updatedAt]
+    'INSERT INTO overlays (id, name, type, description, data, elements, tags, favorite, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [overlay.id, overlay.name, overlay.type, overlay.description || '', JSON.stringify(overlay.data), JSON.stringify(overlay.elements || []), JSON.stringify(overlay.tags), overlay.favorite ? 1 : 0, overlay.createdAt, overlay.updatedAt]
   );
 }
 
@@ -169,8 +180,8 @@ export function updateOverlay(id: string, overlay: Partial<OverlayConfig>): bool
 
   const merged = { ...existing, ...overlay, updatedAt: new Date().toISOString() };
   getDb().run(
-    'UPDATE overlays SET name = ?, type = ?, data = ?, elements = ?, tags = ?, favorite = ?, updated_at = ? WHERE id = ?',
-    [merged.name, merged.type, JSON.stringify(merged.data), JSON.stringify(merged.elements || []), JSON.stringify(merged.tags), merged.favorite ? 1 : 0, merged.updatedAt, id]
+    'UPDATE overlays SET name = ?, type = ?, description = ?, data = ?, elements = ?, tags = ?, favorite = ?, updated_at = ? WHERE id = ?',
+    [merged.name, merged.type, merged.description || '', JSON.stringify(merged.data), JSON.stringify(merged.elements || []), JSON.stringify(merged.tags), merged.favorite ? 1 : 0, merged.updatedAt, id]
   );
   return true;
 }
@@ -196,6 +207,7 @@ function rowToOverlay(row: OverlayRow): OverlayConfig {
     id: row.id,
     name: row.name,
     type: row.type as OverlayConfig['type'],
+    description: row.description || '',
     data: JSON.parse(row.data),
     elements: JSON.parse(row.elements || '[]'),
     tags: JSON.parse(row.tags),

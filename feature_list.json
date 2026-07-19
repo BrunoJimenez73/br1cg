@@ -254,5 +254,21 @@
     "track": "production",
     "status": "done",
     "depends_on": [308]
+  },
+  {
+    "id": 401,
+    "title": "[UI] Library + Controller + Editor UI Overhaul",
+    "description": "Rediseño completo: Library con categorías (Graphics, Sports, Widgets, Media, Data), búsqueda, filtros, preview cards, descripciones, favoritos. Controller page con preview redimensionable + controles + edición de elementos dinámicos. Editor con toggle dynamic para elementos editables desde controller. Routing /control/[id]",
+    "track": "ui",
+    "status": "done",
+    "depends_on": [309]
+  },
+  {
+    "id": 402,
+    "title": "[HOTFIX] Timer start/pause/reset buttons don't work",
+    "description": "OverlayRenderer usaba SharedElementRenderer con timer-display estático e ignoraba WS event type messages. Fix: renderizar componente nativo Timer.tsx (con usePreciseTimer + WS event handler) cuando existe. TimerControls ahora usa WS persistente del ControllerPage en vez de crear conexión nueva por clic.",
+    "track": "ui",
+    "status": "done",
+    "depends_on": [401]
   }
 ]

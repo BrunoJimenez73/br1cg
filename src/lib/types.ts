@@ -294,14 +294,89 @@ export interface OverlayElement {
   opacity: number;
   visible: boolean;
   locked: boolean;
+  dynamic: boolean;
   props: Record<string, unknown>;
 }
+
+// --- Overlay Categories ---
+export type OverlayCategory = 'graphics' | 'sports' | 'widgets' | 'media' | 'data';
+
+export const OVERLAY_CATEGORY_LABELS: Record<OverlayCategory, string> = {
+  graphics: 'Graphics',
+  sports: 'Sports',
+  widgets: 'Widgets',
+  media: 'Media',
+  data: 'Data',
+};
+
+export const OVERLAY_CATEGORIES: Record<OverlayType, OverlayCategory> = {
+  'lower-third': 'graphics',
+  'title-card': 'graphics',
+  'ticker': 'graphics',
+  'alert': 'graphics',
+  'brb': 'graphics',
+  'scorebug': 'sports',
+  'timer': 'widgets',
+  '2x-counter': 'widgets',
+  'money-effect': 'widgets',
+  'social-looper': 'widgets',
+  'driveby': 'widgets',
+  'webcam-border': 'media',
+  'sponsor-logo': 'media',
+  'weather-bug': 'data',
+  'yt-view-count': 'data',
+};
+
+export const OVERLAY_CATEGORY_ICONS: Record<OverlayCategory, string> = {
+  graphics: '🎨',
+  sports: '⚽',
+  widgets: '🧩',
+  media: '📷',
+  data: '📊',
+};
+
+export const OVERLAY_TYPE_DESCRIPTIONS: Record<OverlayType, string> = {
+  'lower-third': 'Name + title overlay for introductions and speakers',
+  'timer': 'Countdown or count-up timer for streams',
+  'scorebug': 'Sports scoreboard with team scores and period',
+  'title-card': 'Fullscreen title or announcement card',
+  'ticker': 'Scrolling text crawl for news or messages',
+  'alert': 'Notification popup for followers, donations, etc.',
+  'webcam-border': 'Decorative frame for webcam footage',
+  'sponsor-logo': 'Sponsor logo with fade in/out animation',
+  'brb': 'Be Right Back screen for stream breaks',
+  '2x-counter': 'Counter for raids, donations, or milestones',
+  'money-effect': 'Donation effect with animated currency',
+  'social-looper': 'Rotating social media handles display',
+  'weather-bug': 'Live weather information overlay',
+  'yt-view-count': 'YouTube live viewer counter',
+  'driveby': 'Scrolling raid or drive-by notification',
+};
+
+export const OVERLAY_TYPE_ICONS: Record<OverlayType, string> = {
+  'lower-third': '📋',
+  'timer': '⏱️',
+  'scorebug': '🏆',
+  'title-card': '🖼️',
+  'ticker': '📰',
+  'alert': '🔔',
+  'webcam-border': '📹',
+  'sponsor-logo': '💼',
+  'brb': '🔙',
+  '2x-counter': '🔢',
+  'money-effect': '💰',
+  'social-looper': '🔄',
+  'weather-bug': '🌤️',
+  'yt-view-count': '👁️',
+  'driveby': '🚗',
+};
 
 // --- Overlay Config unificado ---
 export interface OverlayConfig {
   id: string;
   name: string;
   type: OverlayType;
+  description?: string;
   createdAt: string;
   updatedAt: string;
   data: OverlayConfigData;

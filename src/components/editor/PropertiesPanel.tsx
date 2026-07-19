@@ -56,6 +56,18 @@ export default function PropertiesPanel({ element, onChange }: Props) {
           <input type="checkbox" checked={element.locked} onChange={e => onChange({ locked: e.target.checked })} className="rounded bg-gray-800 border-gray-700" />
           Locked
         </label>
+        <label className="flex items-center gap-2 text-xs text-gray-300 border-t border-gray-700/50 pt-2 mt-1">
+          <input
+            type="checkbox"
+            checked={element.dynamic}
+            onChange={e => onChange({ dynamic: e.target.checked })}
+            className="rounded bg-gray-800 border-gray-700 text-indigo-500 focus:ring-indigo-500"
+          />
+          <span className="flex items-center gap-1">
+            Dynamic
+            <span className="text-[10px] text-indigo-400">(editable from controller)</span>
+          </span>
+        </label>
       </Section>
 
       {element.type === 'text' && (

@@ -248,7 +248,7 @@ function el(
   props: Record<string, unknown>,
   partial?: Partial<OverlayElement>,
 ): OverlayElement {
-  return { id, type, x, y, width: w, height: h, rotation: 0, zIndex: 1, opacity: 1, visible: true, locked: false, props, ...partial };
+  return { id, type, x, y, width: w, height: h, rotation: 0, zIndex: 1, opacity: 1, visible: true, locked: false, dynamic: false, props, ...partial };
 }
 
 /**
