@@ -5,6 +5,9 @@
 import { jsonResponse, errorResponse } from '../middleware';
 import { getOverlayStatus, sendOverlayCommand, toggleOverlay } from '../ws-handler';
 import { OVERLAY_TYPES } from '../../src/lib/types';
+import { getAllOverlays, getOverlay, createOverlay, updateOverlay, deleteOverlay } from '../db';
+import { v4 as uuid } from 'uuid';
+import { getDefaultConfig, getDefaultElements } from '../../src/lib/defaults';
 
 const VALID_TYPES = new Set(OVERLAY_TYPES);
 
@@ -33,7 +36,6 @@ export async function handleOverlayRoutes(
 ): Promise<Response | null> {
   const method = req.method;
   const path = url.pathname;
-  const { getAllOverlays, getOverlay, createOverlay, updateOverlay, deleteOverlay } = await import('../db');
 
   // GET /api/overlays — list all
   if (method === 'GET' && path === '/api/overlays') {
@@ -55,9 +57,6 @@ export async function handleOverlayRoutes(
 
   // POST /api/overlays — create
   if (method === 'POST' && path === '/api/overlays') {
-    const { v4: uuid } = await import('uuid');
-    const { getDefaultConfig, getDefaultElements } = await import('../../src/lib/defaults');
-
     try {
       const body = await req.json() as { name: string; type: string; data?: Record<string, unknown>; elements?: unknown[]; tags?: string[] };
       const validationError = validateOverlayBody(body as Record<string, unknown>);
@@ -133,9 +132,6 @@ export async function handleOverlayRoutes(
         return errorResponse('Body must contain an "overlays" array', 400);
       }
 
-      const { v4: uuid } = await import('uuid');
-      const { getDefaultConfig, getDefaultElements } = await import('../../src/lib/defaults');
-
       let imported = 0;
       let skipped = 0;
       const errors: string[] = [];
@@ -200,8 +196,9 @@ export async function handleOverlayRoutes(
 
     if (method === 'PUT' || method === 'PATCH') {
       try {
+        const existing = getOverlay(id);
+        if (!existing) return errorResponse('Not found', 404);
         const body = await req.json();
-        // Validate fields if present
         if (body.type !== undefined && !VALID_TYPES.has(body.type)) {
           return errorResponse(`Invalid type. Must be one of: ${OVERLAY_TYPES.join(', ')}`, 400);
         }
@@ -211,9 +208,9 @@ export async function handleOverlayRoutes(
         if (body.data !== undefined && (typeof body.data !== 'object' || body.data === null || Array.isArray(body.data))) {
           return errorResponse('Data must be an object', 400);
         }
-        const updated = updateOverlay(id, body);
-        if (!updated) return errorResponse('Not found', 404);
-        return jsonResponse(getOverlay(id));
+        updateOverlay(id, body);
+        const updated = { ...existing, ...body, updatedAt: new Date().toISOString() };
+        return jsonResponse(updated);
       } catch {
         return errorResponse('Invalid JSON');
       }

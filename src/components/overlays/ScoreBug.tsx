@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import type { ScoreBugConfig, ScoreBugSport } from '../../lib/types';
-import { useWebSocket } from '../../lib/ws-client';
+import { useOverlayLifecycle } from '../../hooks/useOverlayLifecycle';
 interface ScoreBugProps { config?: Partial<ScoreBugConfig>; overlayId?: string; }
 
 const SPORT_EMOJI: Record<ScoreBugSport, string> = {
@@ -8,26 +8,15 @@ const SPORT_EMOJI: Record<ScoreBugSport, string> = {
   hockey: '🏒', tennis: '🎾', boxing: '🥊', rugby: '🏉', volleyball: '🏐', futsal: '⚽',
 };
 
-export function ScoreBug({ config: c, overlayId }: ScoreBugProps) {
-  const [visible, setVisible] = useState(true);
-  const [live, setLive] = useState<Partial<ScoreBugConfig>>({});
-  const cfg = useMemo<ScoreBugConfig>(() => ({
-    sport: 'soccer', homeTeam: { name: 'HOME', abbrev: 'HOM', score: 0, color: '#3b82f6' },
-    awayTeam: { name: 'AWAY', abbrev: 'AWY', score: 0, color: '#ef4444' },
-    period: '1T', periodTime: '', bgColor: '#111827', textColor: '#ffffff',
-    accentColor: '#3b82f6', showSport: true, showTime: true, style: 'default', ...c, ...live
-  }), [c, live]);
+const DEFAULTS: ScoreBugConfig = {
+  sport: 'soccer', homeTeam: { name: 'HOME', abbrev: 'HOM', score: 0, color: '#3b82f6' },
+  awayTeam: { name: 'AWAY', abbrev: 'AWY', score: 0, color: '#ef4444' },
+  period: '1T', periodTime: '', bgColor: '#111827', textColor: '#ffffff',
+  accentColor: '#3b82f6', showSport: true, showTime: true, style: 'default',
+};
 
-  useWebSocket({
-    overlayId,
-    onMessage: (msg) => {
-      if (msg.type === 'command') {
-        if (msg.action === 'show') setVisible(true);
-        else if (msg.action === 'hide') setVisible(false);
-        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
-      }
-    },
-  });
+export function ScoreBug({ config: c, overlayId }: ScoreBugProps) {
+  const { visible, cfg } = useOverlayLifecycle({ defaults: DEFAULTS, props: c, overlayId });
 
   if (!visible) return null;
 

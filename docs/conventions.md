@@ -45,16 +45,31 @@ Los componentes en `src/components/overlays/` son el **corazón del sistema**. D
 
 ## Mensajes WebSocket
 
-Todos los mensajes se tipan con unión discriminada:
+Todos los mensajes se tipan con unión discriminada (ver `src/lib/types.ts` para la definición completa):
 
 ```typescript
-type WSMessage =
-  | { type: "overlay:show"; overlayId: string; data: Record<string, unknown> }
-  | { type: "overlay:hide"; overlayId: string }
-  | { type: "overlay:update"; overlayId: string; data: Partial<OverlayConfig['data']> }
-  | { type: "overlay:timer:start"; overlayId: string }
-  | { type: "overlay:timer:pause"; overlayId: string }
-  | { type: "ping" };
+// Client → Server
+export type WSClientMessage =
+  | { type: 'overlay:show'; overlayId: string; data?: Record<string, unknown> }
+  | { type: 'overlay:hide'; overlayId: string }
+  | { type: 'overlay:update'; overlayId: string; data: Record<string, unknown> }
+  | { type: 'overlay:save'; overlayId: string; data: Record<string, unknown> }
+  | { type: 'overlay:timer:start'; overlayId: string }
+  | { type: 'overlay:timer:pause'; overlayId: string }
+  | { type: 'overlay:timer:reset'; overlayId: string; data?: { minutes: number; seconds: number } }
+  | { type: 'ping' };
+
+// Server → Client
+export type WSServerMessage =
+  | { type: 'command'; action: 'show' | 'hide' | 'update'; payload: Record<string, unknown> }
+  | { type: 'event'; event: 'timer:tick'; data: { remaining: number; formatted: string } }
+  | { type: 'event'; event: 'timer:complete'; data: Record<string, never> }
+  | { type: 'event'; event: 'timer:start'; data: Record<string, unknown> }
+  | { type: 'event'; event: 'timer:pause'; data: Record<string, unknown> }
+  | { type: 'event'; event: 'timer:reset'; data: { minutes?: number; seconds?: number } }
+  | { type: 'connected'; clientId: string }
+  | { type: 'pong' }
+  | { type: 'error'; message: string };
 ```
 
 ## CSS / Tailwind

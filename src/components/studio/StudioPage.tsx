@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { OverlayConfig } from '../../lib/types';
 import { OVERLAY_TYPE_LABELS } from '../../lib/types';
+import { getWSBase } from '../../lib/ws-client';
 import * as api from '../../lib/api-client';
 import PreviewPane from './PreviewPane';
 import ControlPane from './ControlPane';
@@ -56,9 +57,7 @@ export default function StudioPage({ overlayId: propId }: StudioPageProps) {
 
   // WebSocket connection
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.port === '4321' ? 'localhost:3001' : window.location.host;
-    const ws = new WebSocket(`${protocol}//${host}/ws?subscribe=${overlayId}`);
+    const ws = new WebSocket(`${getWSBase()}/ws?subscribe=${overlayId}`);
 
     ws.onopen = () => {
       setConnected(true);

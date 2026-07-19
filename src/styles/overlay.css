@@ -3,40 +3,6 @@
    Estos estilos se cargan en el Browser Source
    ───────────────────────────────────────────── */
 
-/* Reset específico para overlays (sin afectar al control panel) */
-.ol-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1920px;
-  height: 1080px;
-  overflow: hidden;
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  pointer-events: none;
-  user-select: none;
-}
-
-.ol-overlay * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* ─── Estado visible/oculto ─── */
-.ol-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.ol-visible {
-  opacity: 1;
-}
-
-/* ─── Transiciones base ─── */
-.ol-transition {
-  transition: opacity 0.3s ease-out;
-}
-
 /* ─── Posiciones ─── */
 .ol-bottom-left {
   bottom: 40px;
@@ -146,230 +112,82 @@
   border-radius: 12px;
 }
 
-/* ─── Timer ─── */
-.ol-timer {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
-}
-
-.ol-timer-display {
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-}
-
-.ol-timer-millis {
-  font-size: 0.5em;
-  font-weight: 400;
-  opacity: 0.7;
-  vertical-align: super;
-}
-
-.ol-timer-label {
-  font-size: 0.25em;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  opacity: 0.6;
-  margin-top: 4px;
-  text-align: center;
-}
-
-/* ─── Ticker ─── */
-.ol-ticker {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.ol-ticker-track {
-  display: inline-block;
-  white-space: nowrap;
-  will-change: transform;
-}
-
-.ol-ticker-message {
-  display: inline-block;
-  padding: 0 8px;
-  font-weight: 500;
-}
-
-.ol-ticker-separator {
-  display: inline-block;
-  padding: 0 16px;
-  opacity: 0.5;
-}
-
-/* ─── Scorebug ─── */
-.ol-scorebug {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  font-weight: 700;
-}
-
-.ol-scorebug-team {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  min-width: 200px;
-}
-
-.ol-scorebug-team-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.ol-scorebug-team-name {
-  font-size: 20px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.ol-scorebug-score {
-  font-size: 36px;
-  font-weight: 800;
-  padding: 12px 24px;
-  text-align: center;
-  min-width: 60px;
-}
-
-.ol-scorebug-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 16px;
-  gap: 2px;
-}
-
-.ol-scorebug-period {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.ol-scorebug-clock {
-  font-size: 16px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ─── Webcam Border ─── */
-.ol-webcam-border {
-  position: absolute;
-  bottom: 40px;
-  right: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.ol-webcam-frame {
+/* ─── Timer (circular variant) ─── */
+.ol-timer-circular {
   position: relative;
-  overflow: hidden;
-}
-
-.ol-webcam-name {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 16px;
-  font-size: 16px;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* ─── Countdown ─── */
-.ol-countdown {
-  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-variant-numeric: tabular-nums;
 }
 
-.ol-countdown-circle {
-  position: relative;
-  width: 200px;
-  height: 200px;
-}
-
-.ol-countdown-circle svg {
+.ol-timer-circular-progress {
   transform: rotate(-90deg);
 }
 
-.ol-countdown-circle-bg {
+.ol-timer-circular-bg {
   fill: none;
   stroke-width: 6;
   opacity: 0.15;
 }
 
-.ol-countdown-circle-progress {
-  fill: none;
-  stroke-width: 6;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.3s ease;
-}
-
-.ol-countdown-value {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.ol-countdown-label {
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-top: 8px;
-}
-
-/* ─── BRB ─── */
-.ol-brb {
+.ol-timer-circular-text {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #000;
-  z-index: 100;
 }
 
-.ol-brb-text {
-  font-size: 64px;
+.ol-timer-circular-time {
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
-.ol-brb-sub {
-  font-size: 24px;
-  font-weight: 400;
+.ol-timer-circular-label {
+  font-size: 14px;
+  font-weight: 500;
   opacity: 0.6;
-  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 4px;
+}
+
+/* ─── Timer (nitrogen corners + lithium line) ─── */
+.ol-timer-corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid;
+  border-right: none;
+  border-bottom: none;
+  pointer-events: none;
+}
+
+.ol-timer-corner-r {
+  border: 2px solid;
+  border-left: none;
+  border-bottom: none;
+}
+
+.ol-timer-line {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ─── Webcam gradient ─── */
+.ol-webcam-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  pointer-events: none;
 }

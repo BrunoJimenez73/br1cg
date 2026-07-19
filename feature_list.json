@@ -130,7 +130,7 @@
   {
     "id": 201,
     "title": "[REF] Limpieza de dead code y bugs menores",
-    "description": "Eliminar componentes legacy (LowerThirdOverlay, TimerOverlay), exports muertos (useTimerControls, DRIVEBY_CSS, MONEY_EFFECT_CSS), completar LayerPanel (botones moveUp/moveDown), fix Math.random en MoneyEffect render",
+    "description": "Eliminar componentes legacy, exports muertos, completar LayerPanel, fix Math.random en MoneyEffect render",
     "track": "refactor",
     "status": "done",
     "depends_on": []
@@ -138,7 +138,7 @@
   {
     "id": 202,
     "title": "[REF] Bugs críticos: command:update + WS reconnect + ControlDashboard",
-    "description": "Agregar command:update a ScoreBug/SponsorLogo/WebcamBorder/WeatherBug/YTViewCount, reconexión WS con backoff en useWebSocket, extraer nested components de ControlDashboard",
+    "description": "Agregar command:update a overlays, reconexión WS con backoff, extraer nested components de ControlDashboard",
     "track": "refactor",
     "status": "done",
     "depends_on": [201]
@@ -146,15 +146,15 @@
   {
     "id": 203,
     "title": "[REF] Arquitectura: API routes modulares + validación",
-    "description": "Extraer API routes de server/index.ts a server/routes/overlays.ts y server/routes/templates.ts, agregar validación de entrada, corregir AGENTS.md, unificar sistema de animaciones",
+    "description": "Extraer API routes a server/routes/, agregar validación de entrada, corregir AGENTS.md, unificar sistema de animaciones",
     "track": "refactor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [202]
   },
   {
     "id": 204,
     "title": "[REF] Calidad: Error boundaries + presets + JSDoc",
-    "description": "ErrorBoundary para overlays, fix Ticker estado redundante, agregar presets para 15 tipos, JSDoc en funciones clave de server y lib",
+    "description": "ErrorBoundary para overlays, fix Ticker estado redundante, agregar presets para 15 tipos, JSDoc en funciones clave",
     "track": "refactor",
     "status": "done",
     "depends_on": [202]
@@ -164,7 +164,7 @@
     "title": "[REF] Tests: hooks + API + utils",
     "description": "Tests para useWebSocket, usePreciseTimer, endpoints REST (CRUD overlay), utils (rowToOverlay, getDefaultConfig)",
     "track": "refactor",
-    "status": "pending",
+    "status": "done",
     "depends_on": [203, 204]
   },
   {
@@ -178,9 +178,81 @@
   {
     "id": 207,
     "title": "[REF] Documentación: actualizar docs + checkpoints + history",
-    "description": "Actualizar AGENTS.md, docs/architecture.md, docs/conventions.md, CHECKPOINTS.md, progress/history.md con todo el refactor",
+    "description": "Actualizar AGENTS.md, docs/architecture.md, docs/conventions.md, CHECKPOINTS.md, progress/history.md",
     "track": "refactor",
     "status": "done",
     "depends_on": [206]
+  },
+  {
+    "id": 301,
+    "title": "[PROD] Bug fixes conocidos",
+    "description": "Fix seed.ts, WSClientMessage, dead subscriptions, double getOverlay, LowerThird dead anim classes, Toggle button, test count, feature_list status",
+    "track": "production",
+    "status": "done",
+    "depends_on": []
+  },
+  {
+    "id": 302,
+    "title": "[PROD] Server router rewrite",
+    "description": "Reemplazar if-else chain por Router class. Eliminar await import() dinámicos. Añadir security headers, request logger, body limit. Fix db.ts: WAL mode, closeDb(), fix migration catch.",
+    "track": "production",
+    "status": "done",
+    "depends_on": [301]
+  },
+  {
+    "id": 303,
+    "title": "[PROD] useOverlayLifecycle hook + limpieza overlays",
+    "description": "Crear hook useOverlayLifecycle<T>, migrar 5 overlays, limpiar tipos duplicados, extraer usePreciseTimer a src/hooks/",
+    "track": "production",
+    "status": "done",
+    "depends_on": [301]
+  },
+  {
+    "id": 304,
+    "title": "[PROD] Editor: Zustand store + undo/redo",
+    "description": "Migrar 7 useState al store Zustand, eliminar WS raw del editor, añadir undo/redo con historial (50 snapshots), Ctrl+Z/Ctrl+Shift+Z, fix SSR",
+    "track": "production",
+    "status": "done",
+    "depends_on": [301]
+  },
+  {
+    "id": 305,
+    "title": "[PROD] Dashboard rewrite con hooks compartidos",
+    "description": "Reescrito ControlDashboard con useWebSocket, ScorebugControls, TickerControls, SocialLooperControls, delete con confirmación, edit link",
+    "track": "production",
+    "status": "done",
+    "depends_on": [301, 303]
+  },
+  {
+    "id": 306,
+    "title": "[PROD] Tests reales + coverage",
+    "description": "WS handler tests, REST endpoint tests, useOverlayLifecycle hook tests. 51 bun tests + 137 vitest = 188 tests total",
+    "track": "production",
+    "status": "done",
+    "depends_on": [302, 303]
+  },
+  {
+    "id": 307,
+    "title": "[PROD] WYSIWYG Shared Renderer + Studio Page",
+    "description": "SharedElementRenderer para editor y overlay (WYSIWYG). Studio page con split-pane control+preview. OverlayRenderer reescrito con elementos visuales",
+    "track": "production",
+    "status": "done",
+    "depends_on": [304, 305, 306]
+  },
+  {
+    "id": 308,
+    "title": "[PROD] Hotfix: Router prefix matching + static imports",
+    "description": "Fix route duplicada /editor. Router ahora soporta prefix matching para /api/overlays*. Eliminar dynamic imports en server/index.ts. Eliminar src/components/shared/ vacía. Actualizar feature_list.json y progress/current.md",
+    "track": "production",
+    "status": "done",
+    "depends_on": [307]
+  },
+  {
+    "id": 309,
+    "title": "[PROD] Docs cleanup + API reference",
+    "description": "Fix WSMessage example en conventions.md. Update test count en CHECKPOINTS/history/architecture. Crear docs/api.md (API reference). Crear docs/new-overlay.md (guía). Eliminar CSS muerto de overlay.css. Refactorizar port detection a getAPIBase()/getWSBase()",
+    "track": "production",
+    "status": "done",
+    "depends_on": [308]
   }
 ]

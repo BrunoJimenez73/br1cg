@@ -3,6 +3,7 @@
 // ──────────────────────────────────────────────
 
 import { useState, useEffect } from 'react';
+import { getAPIBase } from '../../lib/ws-client';
 import type { OverlayType } from '../../lib/types';
 
 interface Template {
@@ -33,11 +34,7 @@ export default function TemplatePicker({ onSelect, onClose }: TemplatePickerProp
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const baseUrl =
-      window.location.port === '4321'
-        ? 'http://localhost:3001'
-        : `${window.location.protocol}//${window.location.host}`;
-    fetch(`${baseUrl}/api/templates`)
+    fetch(`${getAPIBase()}/api/templates`)
       .then((r) => r.json())
       .then((data) => {
         setTemplates(data);

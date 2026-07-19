@@ -25,6 +25,17 @@ export function getWSBase(): string {
 }
 
 /**
+ * Returns the HTTP base URL, handling dev (Astro) vs production (Bun) contexts.
+ * In dev mode (port 4321), proxies to localhost:3001 to avoid CORS issues.
+ * @returns The base URL for API requests (e.g., 'http://localhost:3001' or '')
+ */
+export function getAPIBase(): string {
+  if (typeof window === 'undefined') return 'http://localhost:3001';
+  const port = window.location.port;
+  return port === '4321' ? 'http://localhost:3001' : '';
+}
+
+/**
  * React hook for managing a WebSocket connection with auto-reconnect.
  * Features: exponential backoff (1s→30s), heartbeat pings every 30s,
  * automatic reconnection on disconnect, cleanup on unmount.
@@ -52,6 +63,15 @@ export function useWebSocket({ overlayId, onMessage }: { overlayId?: string; onM
   const unmountedRef = useRef(false);
 
   cbRef.current = onMessage;
+
+  /** Send raw data over the WebSocket. Returns true if sent, false if not connected. */
+  const send = (data: unknown): boolean => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(typeof data === 'string' ? data : JSON.stringify(data));
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     unmountedRef.current = false;
@@ -103,4 +123,6 @@ export function useWebSocket({ overlayId, onMessage }: { overlayId?: string; onM
       wsRef.current = null;
     };
   }, [overlayId]);
+
+  return { send, isConnected: () => wsRef.current?.readyState === WebSocket.OPEN };
 }

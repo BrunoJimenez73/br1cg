@@ -24,7 +24,7 @@ export function handleWS(ws: ServerWebSocket<unknown>): void {
     }
   }
 
-  ws.data = { id: crypto.randomUUID(), subscriptions: new Set<string>() };
+  ws.data = { id: crypto.randomUUID() };
 
   ws.send(JSON.stringify({ type: 'connected', clientId: (ws.data as Record<string, unknown>).id } as WSServerMessage));
 

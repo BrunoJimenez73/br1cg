@@ -4,25 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
+import type { WeatherBugConfig, WeatherData } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface WeatherData {
-  temperature: number;
-  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy' | 'windy' | 'partly-cloudy' | 'night';
-  city: string;
-  unit: 'C' | 'F';
-  humidity?: number;
-  windSpeed?: number;
-}
-
-interface WeatherBugConfig {
-  weather: WeatherData;
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-  showDetails: boolean;
-  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-}
 
 interface WeatherBugProps {
   config?: Partial<WeatherBugConfig>;

@@ -1,59 +1,83 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { OVERLAY_TYPE_LABELS, OVERLAY_TYPES, type OverlayConfig, type OverlayType, type OverlayConfigData, type OverlayElement } from '../../lib/types';
+import { useEffect, useCallback } from 'react';
+import { OVERLAY_TYPE_LABELS, OVERLAY_TYPES, type OverlayType, type OverlayConfigData, type OverlayElement } from '../../lib/types';
 import { getDefaultConfig, getDefaultElements } from '../../lib/defaults';
 import { getOverlay, createOverlay, updateOverlay } from '../../lib/api-client';
 import { useEditorStore } from '../../lib/overlay-store';
+import { useWebSocket } from '../../lib/ws-client';
+import type { WSServerMessage } from '../../lib/types';
 import EditorCanvas from './EditorCanvas';
 import PropertiesPanel from './PropertiesPanel';
 import LayerPanel from './LayerPanel';
 import TemplatePicker from './TemplatePicker';
 
-type Tab = 'config' | 'design';
-
-export default function OverlayEditor() {
-  // Support both /editor?id=xxx (legacy) and /editor/xxx (new)
-  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+function getEditorId(): { id: string; isNew: boolean } {
+  if (typeof window === 'undefined') return { id: 'new', isNew: true };
+  const params = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
   const id = params.get('id') || pathParts[pathParts.length - 1] || 'new';
-  const isNew = id === 'new';
+  return { id, isNew: id === 'new' };
+}
 
-  const [tab, setTab] = useState<Tab>('design');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [form, setForm] = useState<Partial<OverlayConfig>>({
-    name: '',
-    type: 'timer',
-    data: getDefaultConfig('timer'),
-    elements: getDefaultElements('timer'),
-    tags: [],
-  });
-  const [showTemplatePicker, setShowTemplatePicker] = useState(isNew);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [currentId, setCurrentId] = useState(id);
-  const wsRef = useRef<WebSocket | null>(null);
+export default function OverlayEditor() {
+  const { id, isNew } = getEditorId();
 
-  // Connect to WebSocket for live updates
+  const overlayId = useEditorStore(s => s.overlayId);
+  const isNewStore = useEditorStore(s => s.isNew);
+  const tab = useEditorStore(s => s.tab);
+  const editedOverlay = useEditorStore(s => s.editedOverlay);
+  const selectedElementId = useEditorStore(s => s.selectedElementId);
+  const saving = useEditorStore(s => s.saving);
+  const saved = useEditorStore(s => s.saved);
+  const showTemplatePicker = useEditorStore(s => s.showTemplatePicker);
+
+  const setOverlayId = useEditorStore(s => s.setOverlayId);
+  const setEditedOverlay = useEditorStore(s => s.setEditedOverlay);
+  const updateOverlayState = useEditorStore(s => s.updateOverlay);
+  const updateData = useEditorStore(s => s.updateData);
+  const updateElement = useEditorStore(s => s.updateElement);
+  const addElement = useEditorStore(s => s.addElement);
+  const removeElement = useEditorStore(s => s.removeElement);
+  const changeType = useEditorStore(s => s.changeType);
+  const setSelectedElementId = useEditorStore(s => s.setSelectedElementId);
+  const setSaving = useEditorStore(s => s.setSaving);
+  const setSaved = useEditorStore(s => s.setSaved);
+  const setTab = useEditorStore(s => s.setTab);
+  const setShowTemplatePicker = useEditorStore(s => s.setShowTemplatePicker);
+  const undo = useEditorStore(s => s.undo);
+  const redo = useEditorStore(s => s.redo);
+
+  // Initialize overlay ID on mount
   useEffect(() => {
-    if (isNew || !currentId) return;
+    setOverlayId(id);
+  }, [id, setOverlayId]);
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.port === '4321' ? 'localhost:3001' : window.location.host;
-    const ws = new WebSocket(`${protocol}//${host}/ws?subscribe=${currentId}`);
+  // Keyboard shortcuts (Ctrl+Z / Ctrl+Shift+Z)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const isMod = e.ctrlKey || e.metaKey;
+      if (!isMod) return;
+      if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (e.key === 'z' && e.shiftKey) { e.preventDefault(); redo(); }
+      if (e.key === 'y') { e.preventDefault(); redo(); }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
 
-    ws.onopen = () => {
-      console.log('[Editor] WebSocket connected to overlay:', currentId);
-    };
-
-    wsRef.current = ws;
-    return () => ws.close();
-  }, [currentId, isNew]);
+  // WebSocket for live overlay updates (sends save commands after REST)
+  const { send: wsSend } = useWebSocket({
+    overlayId: isNewStore ? undefined : overlayId,
+    onMessage: useCallback((_msg: WSServerMessage) => {
+      // Editor doesn't need to process incoming messages
+    }, []),
+  });
 
   // Load overlay from API
   useEffect(() => {
     if (!isNew) {
       getOverlay(id)
         .then(data => {
-          setForm({
+          setEditedOverlay({
             name: data.name,
             type: data.type,
             data: data.data,
@@ -63,32 +87,7 @@ export default function OverlayEditor() {
         })
         .catch(console.error);
     }
-  }, [id, isNew]);
-
-  function handleTypeChange(type: OverlayType) {
-    setForm(prev => ({
-      ...prev,
-      type,
-      data: getDefaultConfig(type),
-      elements: getDefaultElements(type),
-    }));
-  }
-
-  function handleDataChange(key: string, value: unknown) {
-    setForm(prev => ({
-      ...prev,
-      data: { ...prev.data, [key]: value } as OverlayConfigData,
-    }));
-  }
-
-  function handleElementUpdate(elementId: string, patch: Partial<OverlayElement>) {
-    setForm(prev => ({
-      ...prev,
-      elements: (prev.elements || []).map(el =>
-        el.id === elementId ? { ...el, ...patch } : el
-      ),
-    }));
-  }
+  }, [id, isNew, setEditedOverlay]);
 
   function handleElementAdd(type: OverlayElement['type']) {
     const newEl: OverlayElement = {
@@ -99,65 +98,51 @@ export default function OverlayEditor() {
       width: type === 'timer-display' ? 400 : 200,
       height: type === 'timer-display' ? 80 : type === 'text' ? 40 : 100,
       rotation: 0,
-      zIndex: (form.elements?.length || 0) + 1,
+      zIndex: (editedOverlay?.elements?.length || 0) + 1,
       opacity: 1,
       visible: true,
       locked: false,
       props: getDefaultProps(type),
     };
-    setForm(prev => ({
-      ...prev,
-      elements: [...(prev.elements || []), newEl],
-    }));
-    setSelectedId(newEl.id);
-  }
-
-  function handleElementDelete(elementId: string) {
-    setForm(prev => ({
-      ...prev,
-      elements: (prev.elements || []).filter(el => el.id !== elementId),
-    }));
+    addElement(newEl);
+    setSelectedElementId(newEl.id);
   }
 
   async function handleSave() {
+    if (!editedOverlay) return;
     setSaving(true);
     setSaved(false);
     try {
-      const method = isNew ? 'POST' : 'PUT';
       const payload = {
-        name: form.name,
-        type: form.type,
-        data: form.data,
-        elements: form.elements,
-        tags: form.tags,
+        name: editedOverlay.name,
+        type: editedOverlay.type,
+        data: editedOverlay.data,
+        elements: editedOverlay.elements,
+        tags: editedOverlay.tags,
       };
 
-      let savedId = currentId;
-      if (isNew) {
+      let savedId = overlayId;
+      if (isNewStore) {
         const created = await createOverlay(payload);
         savedId = created.id;
-        setCurrentId(savedId);
+        setOverlayId(savedId);
         const newUrl = `/editor?id=${savedId}`;
         window.history.replaceState(null, '', newUrl);
       } else {
-        await updateOverlay(currentId, payload);
+        await updateOverlay(overlayId, payload);
       }
 
       setSaved(true);
 
-      // Send WebSocket update to live overlay with full data + elements
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        const updateMsg = {
-          type: 'overlay:save',
-          overlayId: savedId,
-          data: {
-            ...form.data,
-            elements: form.elements,
-          },
-        };
-        wsRef.current.send(JSON.stringify(updateMsg));
-        console.log('[Editor] Sent WebSocket save:', updateMsg);
-      }
+      // Notify live overlay via WebSocket
+      wsSend({
+        type: 'overlay:save',
+        overlayId: savedId,
+        data: {
+          ...editedOverlay.data,
+          elements: editedOverlay.elements,
+        },
+      });
 
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -167,10 +152,10 @@ export default function OverlayEditor() {
     }
   }
 
-  const selectedElement = form.elements?.find(el => el.id === selectedId) || null;
+  const selectedElement = editedOverlay?.elements?.find(el => el.id === selectedElementId) || null;
 
   function handleTemplateSelect(type: OverlayType, templateName: string) {
-    setForm({
+    setEditedOverlay({
       name: templateName,
       type,
       data: getDefaultConfig(type),
@@ -192,12 +177,12 @@ export default function OverlayEditor() {
       <div className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-semibold">
-            {isNew ? 'New Overlay' : 'Edit Overlay'}
+            {isNewStore ? 'New Overlay' : 'Edit Overlay'}
           </h1>
           <span className="text-xs px-2 py-1 bg-indigo-900/50 text-indigo-300 rounded">
-            {OVERLAY_TYPE_LABELS[form.type as OverlayType] || form.type}
+            {OVERLAY_TYPE_LABELS[editedOverlay?.type as OverlayType] || editedOverlay?.type}
           </span>
-          {!isNew && (
+          {!isNewStore && (
             <button
               onClick={() => setShowTemplatePicker(true)}
               className="text-xs text-gray-500 hover:text-gray-300 ml-2"
@@ -207,6 +192,11 @@ export default function OverlayEditor() {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {/* Undo/Redo buttons */}
+          <div className="flex gap-1">
+            <UndoRedoBtn label="Undo" shortcut="Ctrl+Z" onClick={undo} />
+            <UndoRedoBtn label="Redo" shortcut="Ctrl+Shift+Z" onClick={redo} />
+          </div>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -232,12 +222,12 @@ export default function OverlayEditor() {
             {/* Canvas */}
             <div className="flex-1">
               <EditorCanvas
-                elements={form.elements || []}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onUpdate={handleElementUpdate}
+                elements={editedOverlay?.elements || []}
+                selectedId={selectedElementId}
+                onSelect={setSelectedElementId}
+                onUpdate={(elementId, patch) => updateElement(elementId, patch)}
                 onAdd={handleElementAdd}
-                onDelete={handleElementDelete}
+                onDelete={removeElement}
               />
             </div>
 
@@ -249,7 +239,7 @@ export default function OverlayEditor() {
                 {selectedElement ? (
                   <PropertiesPanel
                     element={selectedElement}
-                    onChange={(patch) => handleElementUpdate(selectedElement.id, patch)}
+                    onChange={(patch) => updateElement(selectedElement.id, patch)}
                   />
                 ) : (
                   <p className="text-xs text-gray-600">Select an element</p>
@@ -260,10 +250,10 @@ export default function OverlayEditor() {
               <div className="p-4 flex-1">
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">Layers</h3>
                 <LayerPanel
-                  elements={form.elements || []}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  onUpdate={handleElementUpdate}
+                  elements={editedOverlay?.elements || []}
+                  selectedId={selectedElementId}
+                  onSelect={setSelectedElementId}
+                  onUpdate={(elementId, patch) => updateElement(elementId, patch)}
                 />
               </div>
             </div>
@@ -276,8 +266,8 @@ export default function OverlayEditor() {
                 <label className="block text-sm text-gray-400 mb-1">Name</label>
                 <input
                   type="text"
-                  value={form.name || ''}
-                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+                  value={editedOverlay?.name || ''}
+                  onChange={e => updateOverlayState({ name: e.target.value })}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500"
                   placeholder="My Overlay"
                 />
@@ -286,8 +276,8 @@ export default function OverlayEditor() {
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Type</label>
                 <select
-                  value={form.type}
-                  onChange={e => handleTypeChange(e.target.value as OverlayType)}
+                  value={editedOverlay?.type}
+                  onChange={e => changeType(e.target.value as OverlayType)}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500"
                 >
                   {OVERLAY_TYPES.map(type => (
@@ -298,7 +288,7 @@ export default function OverlayEditor() {
 
               <div className="border-t border-gray-800 pt-4">
                 <h3 className="text-sm font-semibold text-gray-400 mb-3">Overlay Data</h3>
-                {form.data && Object.entries(form.data).map(([key, value]) => {
+                {editedOverlay?.data && Object.entries(editedOverlay.data).map(([key, value]) => {
                   if (typeof value === 'boolean') {
                     return (
                       <div key={key}>
@@ -306,7 +296,7 @@ export default function OverlayEditor() {
                           <input
                             type="checkbox"
                             checked={value}
-                            onChange={e => handleDataChange(key, e.target.checked)}
+                            onChange={e => updateData(key, e.target.checked)}
                             className="rounded bg-gray-800 border-gray-700"
                           />
                           {key}
@@ -322,7 +312,7 @@ export default function OverlayEditor() {
                         <input
                           type="number"
                           value={value}
-                          onChange={e => handleDataChange(key, Number(e.target.value))}
+                          onChange={e => updateData(key, Number(e.target.value))}
                           className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500"
                         />
                       </div>
@@ -335,7 +325,7 @@ export default function OverlayEditor() {
                         <label className="block text-sm text-gray-400 mb-1">{key}</label>
                         <textarea
                           value={value.join('\n')}
-                          onChange={e => handleDataChange(key, e.target.value.split('\n').filter(Boolean))}
+                          onChange={e => updateData(key, e.target.value.split('\n').filter(Boolean))}
                           className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500 h-24 font-mono text-xs"
                         />
                       </div>
@@ -350,13 +340,13 @@ export default function OverlayEditor() {
                           <input
                             type="color"
                             value={typeof value === 'string' ? value : '#000000'}
-                            onChange={e => handleDataChange(key, e.target.value)}
+                            onChange={e => updateData(key, e.target.value)}
                             className="w-10 h-10 rounded cursor-pointer bg-transparent border border-gray-700"
                           />
                           <input
                             type="text"
                             value={typeof value === 'string' ? value : ''}
-                            onChange={e => handleDataChange(key, e.target.value)}
+                            onChange={e => updateData(key, e.target.value)}
                             className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500 font-mono text-sm"
                           />
                         </div>
@@ -370,7 +360,7 @@ export default function OverlayEditor() {
                       <input
                         type="text"
                         value={typeof value === 'string' ? value : String(value)}
-                        onChange={e => handleDataChange(key, e.target.value)}
+                        onChange={e => updateData(key, e.target.value)}
                         className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -396,6 +386,18 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
       }`}
     >
       {children}
+    </button>
+  );
+}
+
+function UndoRedoBtn({ label, shortcut, onClick }: { label: string; shortcut: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title={`${label} (${shortcut})`}
+      className="px-2 py-1 text-xs text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors"
+    >
+      {label === 'Undo' ? '↩' : '↪'}
     </button>
   );
 }

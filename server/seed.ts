@@ -14,16 +14,25 @@ const db = new Database(DB_PATH);
 
 // Crear tablas si no existen
 db.run(`
-  CREATE TABLE IF NOT EXISTS overlay_configs (
+  CREATE TABLE IF NOT EXISTS overlays (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    data TEXT NOT NULL DEFAULT '{}',
-    elements TEXT,
-    tags TEXT NOT NULL DEFAULT '[]',
-    favorite INTEGER NOT NULL DEFAULT 0
+    data TEXT NOT NULL,
+    tags TEXT DEFAULT '[]',
+    favorite INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`);
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS templates (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    data TEXT NOT NULL,
+    category TEXT NOT NULL
   )
 `);
 
@@ -73,8 +82,8 @@ const overlays = [
 ];
 
 const insert = db.prepare(`
-  INSERT OR REPLACE INTO overlay_configs (id, name, type, data, elements, tags, favorite)
-  VALUES ($id, $name, $type, $data, $elements, $tags, 0)
+  INSERT OR REPLACE INTO overlays (id, name, type, data, tags, favorite, created_at, updated_at)
+  VALUES ($id, $name, $type, $data, $tags, 0, datetime('now'), datetime('now'))
 `);
 
 for (const overlay of overlays) {
@@ -83,7 +92,6 @@ for (const overlay of overlays) {
     $name: overlay.name,
     $type: overlay.type,
     $data: JSON.stringify(overlay.data),
-    $elements: null,
     $tags: JSON.stringify(overlay.tags),
   });
   console.log(`  ✓ ${overlay.id} — ${overlay.name}`);

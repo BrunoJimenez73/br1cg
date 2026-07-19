@@ -1,27 +1,15 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React from 'react';
 import type { SponsorLogoConfig } from '../../lib/types';
-import { useWebSocket } from '../../lib/ws-client';
+import { useOverlayLifecycle } from '../../hooks/useOverlayLifecycle';
 interface SponsorLogoProps { config?: Partial<SponsorLogoConfig>; overlayId?: string; }
 
-export function SponsorLogo({ config: c, overlayId }: SponsorLogoProps) {
-  const [visible, setVisible] = useState(true);
-  const [live, setLive] = useState<Partial<SponsorLogoConfig>>({});
-  const cfg = useMemo<SponsorLogoConfig>(() => ({
-    logoUrl: '', name: 'Sponsor', width: 200, height: 80,
-    position: 'bottom-right', bgColor: 'transparent', opacity: 0.8,
-    ...c, ...live
-  }), [c, live]);
+const DEFAULTS: SponsorLogoConfig = {
+  logoUrl: '', name: 'Sponsor', width: 200, height: 80,
+  position: 'bottom-right', bgColor: 'transparent', opacity: 0.8,
+};
 
-  useWebSocket({
-    overlayId,
-    onMessage: (msg) => {
-      if (msg.type === 'command') {
-        if (msg.action === 'show') setVisible(true);
-        else if (msg.action === 'hide') setVisible(false);
-        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
-      }
-    },
-  });
+export function SponsorLogo({ config: c, overlayId }: SponsorLogoProps) {
+  const { visible, cfg } = useOverlayLifecycle({ defaults: DEFAULTS, props: c, overlayId });
 
   if (!visible) return null;
 

@@ -4,19 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import type { DriveByConfig } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface DriveByConfig {
-  message: string;
-  fontSize: number;
-  speed: number; // segundos en cruzar
-  textColor: string;
-  bgColor: string;
-  direction: 'left' | 'right';
-  yPosition: number; // px desde arriba
-  repeat: boolean;
-  repeatDelay: number;
-}
 
 interface DriveByProps {
   config?: Partial<DriveByConfig>;

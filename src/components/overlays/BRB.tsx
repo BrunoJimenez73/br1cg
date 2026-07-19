@@ -5,20 +5,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useEffect, useMemo } from 'react';
+import type { BRBConfig } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface BRBConfig {
-  message: string;
-  subtitle?: string;
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-  style: 'classic' | 'nursery';
-  showTimer: boolean;
-  timerMinutes?: number;
-  timerSeconds?: number;
-  logoUrl?: string;
-}
 
 interface BRBProps {
   config?: Partial<BRBConfig>;

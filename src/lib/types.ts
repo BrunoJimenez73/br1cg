@@ -351,6 +351,7 @@ export type WSClientMessage =
   | { type: 'overlay:show'; overlayId: string; data?: Record<string, unknown> }
   | { type: 'overlay:hide'; overlayId: string }
   | { type: 'overlay:update'; overlayId: string; data: Record<string, unknown> }
+  | { type: 'overlay:save'; overlayId: string; data: Record<string, unknown> }
   | { type: 'overlay:timer:start'; overlayId: string }
   | { type: 'overlay:timer:pause'; overlayId: string }
   | { type: 'overlay:timer:reset'; overlayId: string; data?: { minutes: number; seconds: number } }

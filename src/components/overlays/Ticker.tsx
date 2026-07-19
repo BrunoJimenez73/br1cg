@@ -1,41 +1,23 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { TickerConfig } from '../../lib/types';
-import { useWebSocket } from '../../lib/ws-client';
+import { useOverlayLifecycle } from '../../hooks/useOverlayLifecycle';
 
 interface TickerProps { config?: Partial<TickerConfig>; overlayId?: string; }
 
+const DEFAULTS: TickerConfig = {
+  messages: ['Noticia de ejemplo'],
+  speed: 80, separator: '•', bgColor: '#000000', textColor: '#ffffff',
+  accentColor: '#3b82f6', fontSize: 18, animation: 'scroll', height: 40,
+  position: 'bottom',
+};
+
 export function Ticker({ config: c, overlayId }: TickerProps) {
-  const [visible, setVisible] = useState(true);
-  const [messages, setMessages] = useState<string[]>(['Noticia de ejemplo — Streaming en vivo']);
+  const { visible, cfg } = useOverlayLifecycle({ defaults: DEFAULTS, props: c, overlayId });
   const [scrollPos, setScrollPos] = useState(0);
   const rafRef = useRef(0);
 
-  const cfg = useMemo<TickerConfig>(() => ({
-    messages: ['Noticia de ejemplo'],
-    speed: 80, separator: '•', bgColor: '#000000', textColor: '#ffffff',
-    accentColor: '#3b82f6', fontSize: 18, animation: 'scroll', height: 40,
-    position: 'bottom', ...c
-  }), [c]);
-
-  useWebSocket({
-    overlayId,
-    onMessage: (msg) => {
-      if (msg.type === 'command') {
-        if (msg.action === 'show') setVisible(true);
-        else if (msg.action === 'hide') setVisible(false);
-        else if (msg.action === 'update') {
-          const p = msg.payload as Partial<TickerConfig>;
-          if (p.messages) setMessages(p.messages);
-        }
-      }
-    },
-  });
-
   const animate = useCallback(() => {
-    setScrollPos(prev => {
-      const speed = cfg.speed / 60;
-      return prev - speed;
-    });
+    setScrollPos(prev => prev - cfg.speed / 60);
     rafRef.current = requestAnimationFrame(animate);
   }, [cfg.speed]);
 
@@ -46,13 +28,9 @@ export function Ticker({ config: c, overlayId }: TickerProps) {
     }
   }, [cfg.animation, animate]);
 
-  useEffect(() => {
-    setMessages(c?.messages || cfg.messages);
-  }, [c?.messages]);
-
   if (!visible) return null;
 
-  const text = (messages.length > 0 ? messages : cfg.messages).join(` ${cfg.separator} `);
+  const text = cfg.messages.join(` ${cfg.separator} `);
   const doubledText = `${text} ${cfg.separator} ${text} ${cfg.separator} `;
 
   return (

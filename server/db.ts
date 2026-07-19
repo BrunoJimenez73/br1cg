@@ -18,6 +18,17 @@ interface OverlayRow {
 let db: Database | null = null;
 
 /**
+ * Closes the database connection gracefully.
+ * Should be called during server shutdown.
+ */
+export function closeDb(): void {
+  if (db) {
+    db.close();
+    db = null;
+  }
+}
+
+/**
  * Creates an automatic backup of the SQLite database before initialization.
  * Copies store.db to data/backup/store-{timestamp}.db.
  * Keeps only the last 5 backups to prevent disk bloat.
@@ -77,6 +88,9 @@ export function getDb(): Database {
  * @param database - The SQLite database to initialize
  */
 function initSchema(database: Database): void {
+  database.run('PRAGMA journal_mode=WAL');
+  database.run('PRAGMA foreign_keys=ON');
+
   database.run(`
     CREATE TABLE IF NOT EXISTS overlays (
       id TEXT PRIMARY KEY,
@@ -93,8 +107,11 @@ function initSchema(database: Database): void {
   // Migration: add elements column if missing
   try {
     database.run(`ALTER TABLE overlays ADD COLUMN elements TEXT DEFAULT '[]'`);
-  } catch {
-    // Column already exists — ignore
+  } catch (e) {
+    const msg = (e as Error).message || String(e);
+    if (!msg.includes('duplicate column')) {
+      console.error('[DB] Migration error:', msg);
+    }
   }
 
   database.run(`

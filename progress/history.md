@@ -35,3 +35,22 @@
 - Initial commit + push (71 archivos)
 - AGENTS.md actualizado con estado real y GitHub URL
 - CHECKPOINTS.md marcado completo para features core + parallel
+
+## 2026-07-19 — Sesión 10: Feature 304 — Editor Zustand store + undo/redo
+- Reescrito `overlay-store.ts` con acciones atómicas (updateData, updateElement, addElement, removeElement, changeType)
+- Historial undo/redo con 50 snapshots, Ctrl+Z/Ctrl+Shift+Z
+- Migrado OverlayEditor.tsx: eliminados 7 useState → store
+- Fix SSR: `getEditorId()` como función (window.location fuera del componente)
+- `useWebSocket` ahora retorna `send()` e `isConnected()`
+- Editor envía overlay:save por WS post-REST para live update
+- Tests: 103/103 pasan. Build: OK.
+
+## 2026-07-19 — Sesión 11: Feature 305 — Dashboard rewrite
+- ControlDashboard reescrito con useWebSocket (sin WS raw)
+- Eliminado Quick Test section hardcodeada (timer-1/lower-1)
+- Delete con window.confirm() + botón Edit por overlay
+- ScorebugControls: score home/away +/-/3, period selector (1H/2H/OT/FT + custom)
+- TickerControls: messages textarea + speed slider
+- SocialLooperControls: accounts list add/remove + rotation interval
+- getControlsForType: 6 tipos (timer, lower-third, scorebug, ticker, social-looper, generic)
+- Tests: 103/103 pasan. Build: OK.

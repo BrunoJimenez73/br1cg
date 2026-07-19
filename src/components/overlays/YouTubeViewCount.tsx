@@ -4,18 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import type { YouTubeViewCountConfig } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface YouTubeViewCountConfig {
-  count: number;
-  label: string;
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-  animation: 'static' | 'counting' | 'pulse';
-  format: 'compact' | 'full';
-  position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-}
 
 interface YouTubeViewCountProps {
   config?: Partial<YouTubeViewCountConfig>;

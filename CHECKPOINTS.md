@@ -83,10 +83,11 @@
 
 ### Tests (205)
 
-- [x] **Tests de componentes**: 83 tests de overlays con vitest
-- [x] **Tests de API**: 10 tests de DB y WS con bun:test
-- [x] **Tests de tipos**: 17 tests de tipos y defaults
-- [x] **Tests pasan**: 230/230 tests pasan (103 vitest + 127 bun)
+- [x] **Tests de componentes**: ~86 tests de overlays con vitest
+- [x] **Tests de API**: ~51 tests de DB, WS handler con bun:test
+- [x] **Tests de tipos/presets/store**: ~34 tests de tipos, presets, editor store con vitest
+- [x] **Tests de hooks**: 8 tests de useOverlayLifecycle con vitest
+- [x] **Tests pasan**: 188 tests reales (137 vitest + 51 bun test) — todos pasan
 
 ### Calidad (204)
 
@@ -104,3 +105,69 @@
 ### Pendiente aún
 
 > ¡Nada! Todas las features del refactor están completadas. 🎉
+
+---
+
+## Checkpoints de Production Hardening (Features 301-307)
+
+Plan detallado: `thoughts/shared/plans/PL-03-production-hardening.md`
+
+### Bug Fixes (301)
+
+- [x] **seed.ts usa tabla correcta**: `bun run db:seed` inserta en `overlays`, no en `overlay_configs`
+- [x] **WSClientMessage incluye overlay:save**: El tipo TypeScript acepta el mensaje
+- [x] **Dead subscriptions eliminado**: No hay `ws.data.subscriptions` en ws-handler.ts
+- [x] **Double getOverlay eliminado**: PUT retorna el overlay actualizado sin query extra
+- [x] **LowerThird animaciones funcionan**: ANIM_IN/ANIM_OUT se aplican al JSX
+- [x] **Toggle button real**: Envía `POST /:id/toggle` en vez de `overlay:show`
+- [x] **Test count preciso**: Documentación refleja 188 tests reales
+- [x] **feature_list consistente**: Features 203/205 marcadas como done
+
+### Server Router (302)
+
+- [x] **Router implementado**: `server/router.ts` con Map<Method+Path, Handler>
+- [x] **Sin await import() dinámicos**: Imports estáticos en routes
+- [x] **Security headers**: X-Content-Type-Options, X-Frame-Options en responses
+- [x] **DB WAL mode**: `PRAGMA journal_mode=WAL` en initSchema
+- [x] **closeDb()**: Función de cleanup para graceful shutdown
+- [x] **Body size limit**: Requests > 1MB rechazados
+
+### Overlay Hook (303)
+
+- [x] **useOverlayLifecycle<T> creado**: Hook compartido en `src/hooks/`
+- [x] **Overlays migrados**: Timer, LowerThird, ScoreBug, Ticker, Alert usan el hook
+- [x] **Tipos locales eliminados**: 8 archivos limpiados de imports duplicados
+- [x] **usePreciseTimer extraído**: Movido de Timer.tsx a `src/hooks/`
+
+### Editor Zustand (304)
+
+- [x] **Store activado**: OverlayEditor usa useEditorStore en vez de useState
+- [x] **WS raw eliminado**: Editor usa useWebSocket hook
+- [x] **Undo/Redo funciona**: Ctrl+Z / Ctrl+Shift+Z con historial de 50 snapshots
+- [x] **Atomic actions**: updateOverlay, updateData, updateElement, addElement, removeElement, changeType
+
+### Dashboard Rewrite (305)
+
+- [x] **WS raw eliminado**: Dashboard usa useWebSocket hook
+- [x] **Quick Test eliminado**: Sección dev removida del dashboard
+- [x] **Toggle real**: Botón toggle funciona correctamente
+- [x] **ScorebugControls funcional**: Score +/-, period editor
+- [x] **TickerControls**: Messages textarea + speed slider
+- [x] **SocialLooperControls**: Accounts list + rotation interval
+
+### Tests Reales (306)
+
+- [x] **DB tests importan de types.ts**: Constantes compartidas, no re-definidas
+- [x] **WS handler testado**: subscribe, unsubscribe, broadcast, rooms (23 tests)
+- [x] **useOverlayLifecycle testado**: Hook con rendering library (8 tests)
+- [x] **Editor store testado**: Zustand store undo/redo (14 tests)
+- [x] **Presets testados**: Validez, categorías, defaults (13 tests)
+- [x] **188 tests total**: 137 vitest + 51 bun test — todos pasan
+
+### Docs Cleanup (307)
+
+- [x] **WSMessage example corregido**: conventions.md con tipos actuales (incluye overlay:save)
+- [x] **Test count actualizado**: CHECKPOINTS.md, architecture.md (188 tests)
+- [x] **API reference creada**: docs/api.md con todos los endpoints
+- [x] **New overlay guide**: docs/new-overlay.md con paso a paso
+- [x] **getAPIBase() compartido**: Reemplaza port detection duplicado en 5 archivos

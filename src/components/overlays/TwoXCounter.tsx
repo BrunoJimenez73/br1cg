@@ -4,19 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import type { TwoXCounterConfig } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface TwoXCounterConfig {
-  label: string;
-  count: number;
-  maxCount: number;
-  style: 'burst' | 'glide';
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-  showMax: boolean;
-  size: 'sm' | 'md' | 'lg';
-}
 
 interface TwoXCounterProps {
   config?: Partial<TwoXCounterConfig>;

@@ -1,27 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import type { WebcamBorderConfig, WebcamBorderStyle } from '../../lib/types';
-import { useWebSocket } from '../../lib/ws-client';
+import { useOverlayLifecycle } from '../../hooks/useOverlayLifecycle';
 interface WebcamBorderProps { config?: Partial<WebcamBorderConfig>; overlayId?: string; }
 
-export function WebcamBorder({ config: c, overlayId }: WebcamBorderProps) {
-  const [visible, setVisible] = useState(true);
-  const [live, setLive] = useState<Partial<WebcamBorderConfig>>({});
-  const cfg = useMemo<WebcamBorderConfig>(() => ({
-    width: 320, height: 240, borderRadius: 8, borderWidth: 2,
-    borderColor: '#3b82f6', bgColor: '#0f172a', glowColor: '#3b82f633',
-    showName: true, playerName: 'Player', style: 'minimal', position: 'bottom-right', ...c, ...live
-  }), [c, live]);
+const DEFAULTS: WebcamBorderConfig = {
+  width: 320, height: 240, borderRadius: 8, borderWidth: 2,
+  borderColor: '#3b82f6', bgColor: '#0f172a', glowColor: '#3b82f633',
+  showName: true, playerName: 'Player', style: 'minimal', position: 'bottom-right',
+};
 
-  useWebSocket({
-    overlayId,
-    onMessage: (msg) => {
-      if (msg.type === 'command') {
-        if (msg.action === 'show') setVisible(true);
-        else if (msg.action === 'hide') setVisible(false);
-        else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload }));
-      }
-    },
-  });
+export function WebcamBorder({ config: c, overlayId }: WebcamBorderProps) {
+  const { visible, cfg } = useOverlayLifecycle({ defaults: DEFAULTS, props: c, overlayId });
 
   if (!visible) return null;
 

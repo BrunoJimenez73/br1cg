@@ -4,18 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import type { MoneyEffectConfig } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface MoneyEffectConfig {
-  amount: string;
-  currency: string;
-  label: string;
-  duration: number;
-  particleCount: number;
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-}
 
 interface MoneyEffectProps {
   config?: Partial<MoneyEffectConfig>;

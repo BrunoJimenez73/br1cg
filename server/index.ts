@@ -3,58 +3,79 @@
 // ──────────────────────────────────────────────
 
 import { serve } from 'bun';
-import { handleWS, handleWSMessage, handleWSClose, getRoomsInfo } from './ws-handler';
-import { handleCORS, jsonResponse, serveStatic, fallbackIndex, corsHeaders } from './middleware';
+import { handleWS, handleWSMessage, handleWSClose, getRoomsInfo, sendOverlayCommand, toggleOverlay } from './ws-handler';
+import { handleCORS, jsonResponse, serveStatic, fallbackIndex, corsHeaders, securityHeaders, checkBodySize, logRequest } from './middleware';
+import { Router } from './router';
+import { closeDb } from './db';
 import { handleOverlayRoutes, handleTemplateRoutes } from './routes/overlays';
 
 const PORT = parseInt(process.env.PORT || '3001');
 
+// ─── Router ───
+const router = new Router();
+
+// Health
+router.get('/api/health', (_req, _url) => {
+  return jsonResponse({
+    status: 'ok',
+    rooms: getRoomsInfo(),
+    uptime: process.uptime(),
+  });
+});
+
+// API routes — prefix matching, no dynamic imports
+router.add('*', '/api/overlays*', async (req, url) => {
+  // Delegate to overlay routes, but only if it's actually an overlay path
+  if (url.pathname.startsWith('/api/overlays')) {
+    const result = await handleOverlayRoutes(req, url);
+    if (result) return result;
+  }
+  return null;
+});
+
+router.add('*', '/api/templates*', async (req, url) => {
+  if (url.pathname.startsWith('/api/templates')) {
+    const result = await handleTemplateRoutes(req, url);
+    if (result) return result;
+  }
+  return null;
+});
+
+// ─── Server ───
 const server = serve({
   port: PORT,
 
   websocket: {
-    open(ws) {
-      handleWS(ws);
-    },
-    message(ws, message) {
-      handleWSMessage(ws, typeof message === 'string' ? message : message.toString());
-    },
-    close(ws) {
-      handleWSClose(ws);
-    },
+    open(ws) { handleWS(ws); },
+    message(ws, message) { handleWSMessage(ws, typeof message === 'string' ? message : message.toString()); },
+    close(ws) { handleWSClose(ws); },
   },
 
   async fetch(req, server) {
     const url = new URL(req.url);
+    const t0 = performance.now();
 
     // 1. CORS preflight
     const corsResponse = handleCORS(req);
     if (corsResponse) return corsResponse;
 
-    // 2. WebSocket upgrade
+    // 2. Body size limit for mutating requests
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      const bodyErr = checkBodySize(req);
+      if (bodyErr) return bodyErr;
+    }
+
+    // 3. WebSocket upgrade
     if (url.pathname === '/ws') {
       const upgraded = server.upgrade(req, { data: { url: req.url } });
       if (!upgraded) return new Response('WebSocket upgrade failed', { status: 400 });
       return undefined;
     }
 
-    // 3. Health check
-    if (url.pathname === '/api/health') {
-      return jsonResponse({
-        status: 'ok',
-        rooms: getRoomsInfo(),
-        uptime: process.uptime(),
-      });
-    }
-
-    // 4. API routes
+    // 4. API routes via router (health + overlays + templates)
     if (url.pathname.startsWith('/api/')) {
-      const overlayResponse = await handleOverlayRoutes(req, url);
-      if (overlayResponse) return overlayResponse;
-
-      const templateResponse = await handleTemplateRoutes(req, url);
-      if (templateResponse) return templateResponse;
-
+      const apiResponse = await router.run(req, url);
+      if (apiResponse) return apiResponse;
       return jsonResponse({ error: 'Not found' }, 404);
     }
 
@@ -72,8 +93,7 @@ const server = serve({
       if (staticResponse) return staticResponse;
     }
 
-    // 6. Dynamic routes: /studio/:id and /editor/:id
-    // Redirect to query param format so Astro can serve the static page
+    // 6. Dynamic routes: /studio/:id and /editor/:id → redirect to query param
     if (url.pathname.startsWith('/studio/') && url.pathname !== '/studio/') {
       const id = url.pathname.split('/')[2];
       return new Response(null, {
@@ -94,9 +114,14 @@ const server = serve({
     if (indexResponse) return indexResponse;
 
     // 8. 404
-    return new Response('Not Found', { status: 404, headers: corsHeaders });
+    logRequest(req, url);
+    return new Response('Not Found', { status: 404, headers: { ...corsHeaders, ...securityHeaders } });
   },
 });
+
+// Graceful shutdown
+process.on('SIGTERM', () => { closeDb(); process.exit(0); });
+process.on('SIGINT', () => { closeDb(); process.exit(0); });
 
 console.log(`⚡ br1cg server running at http://localhost:${PORT}`);
 console.log(`  API:      http://localhost:${PORT}/api/overlays`);

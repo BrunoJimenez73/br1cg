@@ -3,57 +3,33 @@
 // Pantalla completa con título + subtítulo + fondo
 // ──────────────────────────────────────────────
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React from 'react';
 import type { TitleCardConfig } from '../../lib/types';
-import { useWebSocket } from '../../lib/ws-client';
+import { useOverlayLifecycle } from '../../hooks/useOverlayLifecycle';
 
 interface TitleCardProps {
   config?: Partial<TitleCardConfig>;
   overlayId?: string;
 }
 
+const DEFAULTS: TitleCardConfig = {
+  title: 'Título',
+  subtitle: 'Subtítulo',
+  bgImage: '',
+  bgColor: '#0f172a',
+  overlayColor: 'rgba(0,0,0,0.6)',
+  textColor: '#ffffff',
+  animation: 'fade',
+  duration: 5000,
+  fullscreen: true,
+};
+
 export function TitleCard({ config: c, overlayId }: TitleCardProps) {
-  const [visible, setVisible] = useState(false);
-  const [live, setLive] = useState<Partial<TitleCardConfig>>({});
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const cfg = useMemo<TitleCardConfig>(() => ({
-    title: 'Título',
-    subtitle: 'Subtítulo',
-    bgImage: '',
-    bgColor: '#0f172a',
-    overlayColor: 'rgba(0,0,0,0.6)',
-    textColor: '#ffffff',
-    animation: 'fade',
-    duration: 5000,
-    fullscreen: true,
-    ...c,
-    ...live,
-  }), [c, live]);
-
-  useWebSocket({
-    overlayId,
-    onMessage: (msg) => {
-      if (msg.type === 'command') {
-        if (msg.action === 'show') {
-          if (timerRef.current) clearTimeout(timerRef.current);
-          setVisible(true);
-          if (cfg.duration > 0) {
-            timerRef.current = setTimeout(() => setVisible(false), cfg.duration);
-          }
-        } else if (msg.action === 'hide') {
-          setVisible(false);
-          if (timerRef.current) clearTimeout(timerRef.current);
-        } else if (msg.action === 'update') {
-          setLive(p => ({ ...p, ...msg.payload }));
-        }
-      }
-    },
+  const { visible, cfg } = useOverlayLifecycle({
+    defaults: DEFAULTS, props: c, overlayId,
+    initialVisible: false,
+    autoHideMs: c?.duration,
   });
-
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
 
   if (!visible) return null;
 

@@ -4,7 +4,7 @@
 // ──────────────────────────────────────────────
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useWebSocket } from '../../lib/ws-client';
+import { useWebSocket, getAPIBase } from '../../lib/ws-client';
 import type { OverlayElement } from '../../lib/types';
 import SharedElementRenderer from './SharedElementRenderer';
 
@@ -21,7 +21,7 @@ export default function OverlayRenderer({ type }: OverlayRendererProps) {
   const fetchKeyRef = useRef(0);
 
   const fetchConfig = useCallback((id: string) => {
-    const baseUrl = window.location.port === '4321' ? 'http://localhost:3001' : '';
+    const baseUrl = getAPIBase();
     const key = ++fetchKeyRef.current;
     fetch(`${baseUrl}/api/overlays/${id}`)
       .then(res => res.json())

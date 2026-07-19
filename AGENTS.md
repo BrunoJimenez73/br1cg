@@ -23,10 +23,11 @@ Sistema local para generar y controlar overlays HTML (CG) en OBS, vMix, Streamla
 **Stack:** Bun + Astro + React + Tailwind + SQLite (bun:sqlite) + WebSocket nativo
 
 **Estado actual:** Core (1-10) ✅ + Parallel Library (101-106) ✅ + Refactor (201-207) ✅ completadas.
-**Tests:** 110 tests (100 vitest + 10 bun test) — todos pasan.
+**Siguiente fase:** Production Hardening (301-307) — `thoughts/shared/plans/PL-03-production-hardening.md`
+**Tests:** ~126 tests reales (vitest + bun test) — todos pasan.
 **CI/CD:** GitHub Actions (lint → test → test:server → build) en cada push.
-**Editor visual:** Conectado a API + WS + Zustand store + template picker.
-**Server:** Refactorizado en orquestador + middleware + routes modulares.
+**Editor visual:** Conectado a API + WS + template picker (Zustand store existe pero no se usa aún).
+**Server:** Refactorizado en orquestador + middleware + routes modulares (pendiente router rewrite).
 
 **Repositorio:** [github.com/BrunoJimenez73/br1cg](https://github.com/BrunoJimenez73/br1cg)
 
@@ -109,11 +110,12 @@ br1cg/
 | `src/lib/api-client.ts` | Cliente REST (CRUD + WS commands) |
 | `src/lib/overlay-store.ts` | Zustand store del editor |
 | `src/components/editor/TemplatePicker.tsx` | Selector de plantillas |
-| `tests/` | Tests de tipos, componentes, y server (110 tests) |
+| `tests/` | Tests de tipos, componentes, y server (~126 tests reales) |
 | `.github/workflows/ci.yml` | CI/CD (lint → test → build) |
 | `eslint.config.mjs` | ESLint flat config |
 | `.prettierrc` | Prettier config |
 | `thoughts/shared/plans/PL-02-refactor-quality.md` | Plan de refactor 201-207 |
+| `thoughts/shared/plans/PL-03-production-hardening.md` | Plan de production hardening 301-307 |
 | `src/pages/editor/[id].astro` | Editor dinámico por ruta |
 ```
 

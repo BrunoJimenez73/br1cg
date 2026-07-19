@@ -3,19 +3,9 @@
 // ──────────────────────────────────────────────
 
 import type { OverlayConfig } from './types';
+import { getAPIBase } from './ws-client';
 
-const API_BASE = 'http://localhost:3001/api/overlays';
-
-/**
- * Returns the base API URL, handling dev (Astro) vs production (Bun) contexts.
- * In dev mode (port 4321), proxies to localhost:3001 to avoid CORS issues.
- * @returns The base URL for overlay API endpoints
- */
-function getBaseUrl(): string {
-  if (typeof window === 'undefined') return API_BASE;
-  const port = window.location.port;
-  return port === '4321' ? 'http://localhost:3001/api/overlays' : '/api/overlays';
-}
+const API_PATH = '/api/overlays';
 
 /**
  * Generic HTTP request helper with error handling.
@@ -29,8 +19,7 @@ async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const base = getBaseUrl();
-  const url = `${base}${path}`;
+  const url = `${getAPIBase()}${API_PATH}${path}`;
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
@@ -96,6 +85,35 @@ export async function updateOverlay(
  */
 export async function deleteOverlay(id: string): Promise<{ success: boolean }> {
   return request<{ success: boolean }>(`/${id}`, { method: 'DELETE' });
+}
+
+/**
+ * Sends a command (show, hide, update) to an overlay via REST.
+ * @param id - The overlay UUID
+ * @param action - The command action
+ * @param data - Optional payload for the command
+ * @returns Command result
+ */
+export async function sendCommand(
+  id: string,
+  action: 'show' | 'hide' | 'update',
+  data?: Record<string, unknown>,
+): Promise<{ success: boolean; overlayId: string; action: string }> {
+  return request(`/${id}/command`, {
+    method: 'POST',
+    body: JSON.stringify({ action, data }),
+  });
+}
+
+/**
+ * Toggles an overlay's visibility (show ↔ hide).
+ * @param id - The overlay UUID to toggle
+ * @returns Toggle result with new visibility state
+ */
+export async function toggleOverlay(
+  id: string,
+): Promise<{ success: boolean; newState: 'visible' | 'hidden' }> {
+  return request(`/${id}/toggle`, { method: 'POST' });
 }
 
 /**

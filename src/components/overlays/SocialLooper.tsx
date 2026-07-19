@@ -4,25 +4,8 @@
 // ──────────────────────────────────────────────
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import type { SocialLooperConfig, SocialAccount } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
-
-interface SocialAccount {
-  platform: 'twitter' | 'youtube' | 'instagram' | 'tiktok' | 'discord' | 'twitch' | 'facebook' | 'web';
-  handle: string;
-  url?: string;
-}
-
-interface SocialLooperConfig {
-  accounts: SocialAccount[];
-  interval: number;
-  bgColor: string;
-  textColor: string;
-  accentColor: string;
-  animation: 'fade' | 'slide' | 'flip';
-  iconSize: number;
-  fontSize: number;
-  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-}
 
 interface SocialLooperProps {
   config?: Partial<SocialLooperConfig>;

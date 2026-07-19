@@ -4,6 +4,7 @@
 
 import type { OverlayConfig } from '../../lib/types';
 import { OVERLAY_TYPE_LABELS } from '../../lib/types';
+import { getWSBase } from '../../lib/ws-client';
 
 interface ControlPaneProps {
   overlay: OverlayConfig;
@@ -136,9 +137,7 @@ function TimerControls({ config, onConfigChange, addLog, overlayId }: {
   overlayId: string;
 }) {
   function sendTimerCommand(action: string) {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.port === '4321' ? 'localhost:3001' : window.location.host;
-    const ws = new WebSocket(`${protocol}//${host}/ws`);
+    const ws = new WebSocket(`${getWSBase()}/ws`);
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: `overlay:timer:${action}`, overlayId, data: {} }));
       addLog(`timer:${action}`);

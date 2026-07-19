@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import type { LowerThirdConfig, LowerThirdAnimation } from '../../lib/types';
 import { useWebSocket } from '../../lib/ws-client';
 
@@ -9,15 +9,23 @@ const POS: Record<string, string> = { 'bottom-left': 'ol-bottom-left', 'bottom-c
 
 export function LowerThird({ config: c, overlayId }: LowerThirdProps) {
   const [visible, setVisible] = useState(true);
+  const [exiting, setExiting] = useState(false);
   const [live, setLive] = useState<Partial<LowerThirdConfig>>({});
   const cfg = useMemo<LowerThirdConfig>(() => ({ title: 'Nombre', subtitle: 'Subtítulo', logoUrl: '', bgColor: '#1a1a2e', textColor: '#ffffff', accentColor: '#ff6b35', animation: 'slide-left', duration: 0, position: 'bottom-left', ...c, ...live }), [c, live]);
-  useWebSocket({ overlayId, onMessage: (msg) => { if (msg.type === 'command') { if (msg.action === 'show') { setVisible(true); if (msg.payload && Object.keys(msg.payload).length > 0) setLive(p => ({ ...p, ...msg.payload })); } else if (msg.action === 'hide') setVisible(false); else if (msg.action === 'update') setLive(p => ({ ...p, ...msg.payload })); } } });
-  if (!visible) return null;
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const hide = useCallback(() => {
+    setExiting(true);
+    timerRef.current = setTimeout(() => { setExiting(false); setVisible(false); }, 300);
+  }, []);
+
+  useWebSocket({ overlayId, onMessage: (msg) => { if (msg.type === 'command') { if (msg.action === 'show') { clearTimeout(timerRef.current); setExiting(false); setVisible(true); if (msg.payload && Object.keys(msg.payload).length > 0) setLive(p => ({ ...p, ...msg.payload })); } else if (msg.action === 'hide') { hide(); } else if (msg.action === 'update') { setLive(p => ({ ...p, ...msg.payload })); } } } });
+  if (!visible && !exiting) return null;
   const isGlaze = cfg.bgColor.includes('rgba') || cfg.bgColor.includes('0.08');
   const isOnAir = cfg.position === 'top-left' && cfg.accentColor === '#ef4444';
   const isPalladium = cfg.bgColor.includes('gradient');
   const isPrime = cfg.bgColor === 'transparent';
-  return (<div className={`ol-lower-third ${POS[cfg.position] || 'ol-bottom-left'} ${isGlaze ? 'ol-glass' : ''}`} style={{ background: isPalladium ? cfg.bgColor : cfg.backgroundColor, backgroundColor: isPalladium ? undefined : cfg.bgColor, color: cfg.textColor, borderLeft: isPrime ? `3px solid ${cfg.accentColor}` : 'none' }}>
+  return (<div className={`ol-lower-third ${POS[cfg.position] || 'ol-bottom-left'} ${exiting ? ANIM_OUT[cfg.animation] : ANIM_IN[cfg.animation]} ${isGlaze ? 'ol-glass' : ''}`} style={{ background: isPalladium ? cfg.bgColor : cfg.backgroundColor, backgroundColor: isPalladium ? undefined : cfg.bgColor, color: cfg.textColor, borderLeft: isPrime ? `3px solid ${cfg.accentColor}` : 'none' }}>
     {!isGlaze && !isPrime && <div className="ol-lower-third-bar" style={{ backgroundColor: cfg.accentColor }} />}
     <div className="ol-lower-third-content" style={{ paddingTop: isPrime ? 16 : undefined }}>
       {isOnAir && <div className="ol-onair-dot" style={{ backgroundColor: cfg.accentColor }} />}

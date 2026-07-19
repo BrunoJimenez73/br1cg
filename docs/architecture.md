@@ -87,7 +87,7 @@ Plan detallado: `thoughts/shared/plans/PL-02-refactor-quality.md`
 | 202 | Bugs críticos (command:update, WS reconnect, ControlDashboard) | ✅ Completado |
 | 203 | API routes modulares (`server/routes/`), validación de entrada | ✅ Completado |
 | 204 | Error boundaries, presets completos (34 presets, 15 tipos) | ✅ Completado |
-| 205 | Tests (componentes, API, tipos) | ✅ Completado (230 tests) |
+| 205 | Tests (componentes, API, tipos, hooks, store) | ✅ Completado (188 tests reales) |
 | 206 | Export/Import (`GET /export`, `POST /import`, UI buttons) | ✅ Completado |
 | 207 | Documentación actualizada | ✅ Completado |
 
